@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CortIA — Prueba tu peinado</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f4f1ec; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+#app { max-width: 430px; width: 100%; background: #fff; min-height: 100vh; display: flex; flex-direction: column; padding: 16px; gap: 14px; }
+.screen { display: none; flex-direction: column; gap: 14px; }
+.screen.active { display: flex; }
+.header { text-align: center; padding: 10px 0 2px; }
+.logo-mark { width: 44px; height: 44px; border-radius: 14px; background: #1a1a2e; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 7px; }
+h1 { font-size: 24px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px; }
+.header p { font-size: 13px; color: #888; margin-top: 3px; }
+.step-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: all 0.25s; }
+.dot.active { background: #c9a96e; width: 22px; border-radius: 3px; }
+.dot.done { background: #1a1a2e; }
+.src-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.src-btn { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 22px 10px; border-radius: 14px; border: 1.5px solid #ede8de; background: #faf8f4; cursor: pointer; transition: all 0.15s; color: #1a1a2e; -webkit-tap-highlight-color: transparent; }
+.src-btn:active { border-color: #c9a96e; transform: scale(0.97); }
+.src-btn svg { width: 28px; height: 28px; color: #c9a96e; }
+.src-btn span { font-size: 14px; font-weight: 600; }
+.src-btn small { font-size: 11px; color: #888; text-align: center; }
+.cam-box { border-radius: 16px; border: 1px solid #ede8de; background: #faf8f4; overflow: hidden; aspect-ratio: 3/4; position: relative; display: flex; align-items: center; justify-content: center; }
+#video { width: 100%; height: 100%; object-fit: cover; display: none; }
+#prev { width: 100%; height: 100%; object-fit: cover; display: none; }
+.cam-ph { display: flex; flex-direction: column; align-items: center; gap: 10px; color: #bbb; }
+.cam-ph svg { width: 50px; height: 50px; }
+.face-g { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-60%); width: 175px; height: 215px; border: 2px dashed rgba(201,169,110,0.6); border-radius: 50% 50% 40% 40%; pointer-events: none; }
+.g-lbl { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; padding: 4px 12px; border-radius: 20px; white-space: nowrap; pointer-events: none; }
+.cap-row { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 4px 0; }
+.cap-btn { width: 74px; height: 74px; border-radius: 50%; border: 3px solid #c9a96e; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.cap-btn:active { transform: scale(0.92); }
+.cap-inner { width: 56px; height: 56px; border-radius: 50%; background: #1a1a2e; }
+.side-act { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 70px; -webkit-tap-highlight-color: transparent; }
+.side-ico { width: 48px; height: 48px; border-radius: 50%; border: 1px solid #ede8de; background: #faf8f4; display: flex; align-items: center; justify-content: center; color: #888; }
+.side-lbl { font-size: 10px; color: #888; }
+.btn-row { display: flex; gap: 10px; }
+.btn { flex: 1; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: #fff; color: #1a1a2e; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.btn:active { transform: scale(0.97); }
+.btn-p { background: #1a1a2e; color: #f5e6c8; border-color: #1a1a2e; }
+.btn-a { background: #c9a96e; color: #1a1a2e; border-color: #c9a96e; font-size: 15px; }
+.sec-lbl { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+.gen-row { display: flex; gap: 8px; }
+.gen-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #ede8de; background: #faf8f4; font-size: 13px; font-weight: 600; cursor: pointer; color: #1a1a2e; -webkit-tap-highlight-color: transparent; }
+.gen-btn.sel { border-color: #c9a96e; background: #fdf5e6; }
+.sty-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.sty-card { border-radius: 12px; border: 1.5px solid #ede8de; background: #faf8f4; padding: 10px 6px 8px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.sty-card:active { transform: scale(0.95); }
+.sty-card.sel { border-color: #c9a96e; background: #fdf5e6; }
+.sty-e { font-size: 28px; line-height: 1; margin-bottom: 5px; display: block; }
+.sty-n { font-size: 11px; font-weight: 600; color: #1a1a2e; display: block; }
+.sty-s { font-size: 10px; color: #888; display: block; margin-top: 2px; }
+.res-box { border-radius: 16px; border: 1px solid #ede8de; background: #faf8f4; overflow: hidden; aspect-ratio: 3/4; position: relative; display: flex; align-items: center; justify-content: center; }
+.res-box img.result-photo { width: 100%; height: 100%; object-fit: cover; display: none; }
+.loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px; text-align: center; }
+.spin { width: 44px; height: 44px; border: 3px solid #ede8de; border-top-color: #c9a96e; border-radius: 50%; animation: sp 0.85s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.loading strong { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.loading p { font-size: 13px; color: #888; line-height: 1.5; }
+.steps { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.step-item { font-size: 12px; color: #bbb; display: flex; align-items: center; gap: 8px; }
+.step-item.active { color: #c9a96e; font-weight: 600; }
+.step-item.done { color: #3aaa3a; }
+.step-item::before { content: '○'; font-size: 10px; flex-shrink: 0; }
+.step-item.active::before { content: '●'; }
+.step-item.done::before { content: '✓'; }
+.result-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 30px 16px 16px; display: none; }
+.result-badge { display: inline-block; background: #c9a96e; color: #1a1a2e; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 6px; }
+.result-desc { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.5; }
+.ana-card { background: #faf8f4; border: 1px solid #ede8de; border-radius: 14px; padding: 14px 16px; }
+.ana-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 9px; color: #1a1a2e; }
+.ana-card p { font-size: 13px; color: #555; line-height: 1.65; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+.chip { background: #fff; border: 1px solid #ede8de; border-radius: 20px; padding: 5px 11px; font-size: 11px; color: #666; }
+#file-in { display: none; }
+canvas { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo-mark">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5">
+        <path d="M12 2C9 2 7 4 7 7c0 2 1 3.5 2.5 4.5C8 13 7 15 7 17h10c0-2-1-4-2.5-5.5C16 10.5 17 9 17 7c0-3-2-5-5-5z"/>
+        <path d="M9 17v2a3 3 0 0 0 6 0v-2"/><path d="M7 7h10"/>
+      </svg>
+    </div>
+    <h1>CortIA</h1>
+    <p>Prueba tu peinado con IA — resultado visual real</p>
+  </div>
+  <div class="step-row">
+    <div class="dot active" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+
+  <!-- PANTALLA 1: FOTO -->
+  <div id="s-cam" class="screen active">
+    <div class="src-grid" id="src-grid">
+      <div class="src-btn" id="open-cam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Hacer selfie</span>
+        <small>Abre la cámara</small>
+      </div>
+      <label class="src-btn" for="file-in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Galería de fotos</span>
+        <small>Elige una foto existente</small>
+      </label>
+    </div>
+    <div class="cam-box" id="cam-box" style="display:none;">
+      <video id="video" autoplay playsinline muted></video>
+      <img id="prev" alt=""/>
+      <canvas id="canv"></canvas>
+      <div class="cam-ph" id="cam-ph" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size:13px;">Cargando cámara...</span>
+      </div>
+      <div id="cam-ov" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;">
+        <div class="face-g"></div><div class="g-lbl">Centra tu cara aquí</div>
+      </div>
+    </div>
+    <div class="cap-row" id="cap-row" style="display:none;">
+      <label class="side-act" for="file-in">
+        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <span class="side-lbl">Galería</span>
+      </label>
+      <button class="cap-btn" id="cap-btn"><div class="cap-inner"></div></button>
+      <div class="side-act" id="flip-btn">
+        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
+        <span class="side-lbl">Girar</span>
+      </div>
+    </div>
+    <div class="btn-row" id="photo-acts" style="display:none;">
+      <button class="btn" id="retake-btn">← Repetir</button>
+      <button class="btn btn-p" id="use-btn">Usar esta foto →</button>
+    </div>
+    <input type="file" id="file-in" accept="image/*">
+  </div>
+
+  <!-- PANTALLA 2: ESTILO -->
+  <div id="s-style" class="screen">
+    <p class="sec-lbl">Género</p>
+    <div class="gen-row" id="gen-row">
+      <button class="gen-btn sel" data-g="hombre">Hombre</button>
+      <button class="gen-btn" data-g="mujer">Mujer</button>
+      <button class="gen-btn" data-g="neutro">Neutro</button>
+    </div>
+    <p class="sec-lbl">Elige un estilo</p>
+    <div class="sty-grid" id="sty-grid"></div>
+    <div class="btn-row">
+      <button class="btn" id="back-btn">← Volver</button>
+      <button class="btn btn-a" id="gen-btn">✦ Generar peinado</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3: RESULTADO -->
+  <div id="s-result" class="screen">
+    <div class="res-box" id="res-box">
+      <div class="loading" id="loading">
+        <div class="spin"></div>
+        <strong>Generando tu nuevo look...</strong>
+        <p>La IA está aplicando el peinado a tu foto.</p>
+        <div class="steps">
+          <div class="step-item active" id="step1">Subiendo tu foto...</div>
+          <div class="step-item" id="step2">Aplicando el peinado con IA...</div>
+          <div class="step-item" id="step3">Analizando el resultado...</div>
+        </div>
+      </div>
+      <img class="result-photo" id="result-photo" alt="Resultado"/>
+      <div class="result-label" id="result-label">
+        <div class="result-badge" id="result-badge"></div>
+        <div class="result-desc" id="result-desc"></div>
+      </div>
+    </div>
+    <div class="ana-card" id="ana-card" style="display:none;">
+      <h3>✂️ Consejos del estilista</h3>
+      <p id="ana-txt"></p>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="other-btn">Otro estilo</button>
+      <button class="btn btn-p" id="newphoto-btn">Nueva foto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STYLES = {
+  hombre:[
+    {id:'undercut',name:'Undercut',sub:'Moderno',e:'💈',fal:'short_hair'},
+    {id:'fade',name:'Fade',sub:'Degradado',e:'✂️',fal:'short_hair'},
+    {id:'pompadour',name:'Pompadour',sub:'Clásico',e:'🎸',fal:'medium_long_hair'},
+    {id:'buzz',name:'Buzz Cut',sub:'Muy corto',e:'⚡',fal:'buzz_cut'},
+    {id:'quiff',name:'Quiff',sub:'Volumen',e:'🌊',fal:'short_hair'},
+    {id:'slickback',name:'Slick Back',sub:'Elegante',e:'🎩',fal:'medium_long_hair'},
+    {id:'curtains',name:'Cortinillas',sub:'Años 90',e:'🪄',fal:'middle_part'},
+    {id:'textured',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
+    {id:'mullet',name:'Mullet',sub:'Tendencia',e:'🔥',fal:'medium_long_hair'},
+  ],
+  mujer:[
+    {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
+    {id:'lob',name:'Lob',sub:'Media melena',e:'🌸',fal:'medium_long_hair'},
+    {id:'pixie',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
+    {id:'layers',name:'Capas',sub:'Movimiento',e:'🌊',fal:'wavy_hair'},
+    {id:'bangs',name:'Flequillo',sub:'Con fleco',e:'✨',fal:'bangs'},
+    {id:'balayage',name:'Balayage',sub:'Con color',e:'🎨',fal:'long_hair'},
+    {id:'wolf',name:'Wolf Cut',sub:'Tendencia',e:'🐺',fal:'wavy_hair'},
+    {id:'curtainbangs',name:'Flequillo cortina',sub:'Bohemio',e:'🌺',fal:'bangs'},
+    {id:'bun',name:'Moño alto',sub:'Recogido',e:'👑',fal:'bun'},
+  ],
+  neutro:[
+    {id:'buzz',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
+    {id:'textured',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
+    {id:'pixie',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
+    {id:'mohawk',name:'Mohawk',sub:'Atrevido',e:'🤘',fal:'mohawk'},
+    {id:'wolf',name:'Wolf Cut',sub:'Edgy',e:'🐺',fal:'wavy_hair'},
+    {id:'braids',name:'Trenzas',sub:'Original',e:'🧶',fal:'braids'},
+    {id:'bob',name:'Bob',sub:'Geométrico',e:'💎',fal:'bob_cut'},
+    {id:'afro',name:'Afro',sub:'Volumen total',e:'🌟',fal:'afro'},
+    {id:'dreadlocks',name:'Dreadlocks',sub:'Libre',e:'🦁',fal:'dreadlocks'},
+  ]
+};
+
+let photo=null, style=null, gender='hombre', stream=null, facing='user';
+
+function setScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+n).classList.add('active');
+  const idx={cam:0,style:1,result:2}[n];
+  document.querySelectorAll('.dot').forEach((d,i)=>{ d.classList.remove('active','done'); if(i<idx)d.classList.add('done'); else if(i===idx)d.classList.add('active'); });
+  window.scrollTo(0,0);
+}
+
+function renderStyles(){
+  const g=document.getElementById('sty-grid'); g.innerHTML='';
+  STYLES[gender].forEach(s=>{
+    const c=document.createElement('div'); c.className='sty-card'+(style===s.id?' sel':'');
+    c.innerHTML=`<span class="sty-e">${s.e}</span><span class="sty-n">${s.name}</span><span class="sty-s">${s.sub}</span>`;
+    c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
+    g.appendChild(c);
+  });
+}
+
+function showConfirm(){
+  document.getElementById('cam-box').style.display='block';
+  document.getElementById('src-grid').style.display='none';
+  document.getElementById('cap-row').style.display='none';
+  document.getElementById('video').style.display='none';
+  document.getElementById('cam-ov').style.display='none';
+  document.getElementById('prev').style.display='block';
+  document.getElementById('photo-acts').style.display='flex';
+}
+
+async function startCam(){
+  document.getElementById('src-grid').style.display='none';
+  document.getElementById('cam-box').style.display='block';
+  document.getElementById('cam-ph').style.display='flex';
+  try{
+    if(stream)stream.getTracks().forEach(t=>t.stop());
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:720},height:{ideal:960}}});
+    const v=document.getElementById('video'); v.srcObject=stream; v.style.display='block';
+    document.getElementById('cam-ph').style.display='none';
+    document.getElementById('cam-ov').style.display='block';
+    document.getElementById('cap-row').style.display='flex';
+    document.getElementById('photo-acts').style.display='none';
+    document.getElementById('prev').style.display='none';
+  }catch(e){
+    document.getElementById('cam-ph').style.display='none';
+    document.getElementById('cam-box').style.display='none';
+    document.getElementById('src-grid').style.display='grid';
+    alert('No se pudo acceder a la cámara. Usa Galería.');
+  }
+}
+
+document.getElementById('open-cam').onclick=startCam;
+document.getElementById('cap-btn').onclick=()=>{
+  const v=document.getElementById('video'),c=document.getElementById('canv');
+  c.width=v.videoWidth; c.height=v.videoHeight;
+  c.getContext('2d').drawImage(v,0,0);
+  photo=c.toDataURL('image/jpeg',0.9);
+  document.getElementById('prev').src=photo;
+  showConfirm();
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+};
+document.getElementById('flip-btn').onclick=()=>{ facing=facing==='user'?'environment':'user'; startCam(); };
+document.getElementById('file-in').onchange=(e)=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader(); r.onload=(ev)=>{ photo=ev.target.result; document.getElementById('prev').src=photo; if(stream)stream.getTracks().forEach(t=>t.stop()); showConfirm(); }; r.readAsDataURL(f);
+};
+document.getElementById('retake-btn').onclick=()=>{
+  photo=null; document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid';
+};
+document.getElementById('use-btn').onclick=()=>{ if(!photo)return; setScreen('style'); renderStyles(); };
+document.getElementById('gen-row').querySelectorAll('.gen-btn').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.gen-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); gender=b.dataset.g; style=null; renderStyles(); };
+});
+document.getElementById('back-btn').onclick=()=>setScreen('cam');
+
+function setStep(n){ [1,2,3].forEach(i=>{ const el=document.getElementById('step'+i); el.classList.remove('active','done'); if(i<n)el.classList.add('done'); else if(i===n)el.classList.add('active'); }); }
+
+document.getElementById('gen-btn').onclick=async()=>{
+  if(!style){ alert('Elige un estilo primero'); return; }
+  setScreen('result');
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('result-photo').style.display='none';
+  document.getElementById('result-label').style.display='none';
+  document.getElementById('ana-card').style.display='none';
+  setStep(1);
+
+  const sData=STYLES[gender].find(s=>s.id===style);
+  const label=sData?.name||style;
+  const falStyle=sData?.fal||'short_hair';
+  const b64=photo.split(',')[1];
+
+  try{
+    setStep(2);
+    const res=await fetch('/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, styleLabel:label})
+    });
+    const data=await res.json();
+    if(!res.ok||!data.success) throw new Error(data.error||'Error desconocido');
+
+    setStep(3);
+    await new Promise(r=>setTimeout(r,500));
+
+    document.getElementById('loading').style.display='none';
+    const img=document.getElementById('result-photo');
+    img.src=data.resultUrl; img.style.display='block';
+    img.onload=()=>{ document.getElementById('result-badge').textContent=label; document.getElementById('result-desc').textContent='Tu nuevo look generado con IA'; document.getElementById('result-label').style.display='block'; };
+
+    document.getElementById('ana-card').style.display='block';
+    document.getElementById('ana-txt').textContent='💬 Dile a tu peluquero: "'+data.analysis.instrucciones+'"';
+    const chips=document.getElementById('chips'); chips.innerHTML='';
+    (data.analysis.tips||[]).forEach(t=>{ const ch=document.createElement('span'); ch.className='chip'; ch.textContent=t; chips.appendChild(ch); });
+  }catch(err){
+    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;"><div style="font-size:36px;">⚠️</div><strong style="font-size:15px;color:#1a1a2e;">Error al generar</strong><p style="font-size:13px;color:#888;line-height:1.5;max-width:280px;">${err.message}</p><button onclick="document.getElementById('other-btn').click()" style="padding:10px 22px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Volver</button></div>`;
+  }
+};
+
+function resetResult(){ document.getElementById('loading').style.display='flex'; document.getElementById('loading').innerHTML=`<div class="spin"></div><strong>Generando tu nuevo look...</strong><p>La IA está aplicando el peinado a tu foto.</p><div class="steps"><div class="step-item active" id="step1">Subiendo tu foto...</div><div class="step-item" id="step2">Aplicando el peinado con IA...</div><div class="step-item" id="step3">Analizando el resultado...</div></div>`; document.getElementById('result-photo').style.display='none'; document.getElementById('result-label').style.display='none'; }
+document.getElementById('other-btn').onclick=()=>{ resetResult(); setScreen('style'); };
+document.getElementById('newphoto-btn').onclick=()=>{ photo=null; style=null; resetResult(); document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid'; setScreen('cam'); };
+
+renderStyles();
+</script>
+</body>
+</html>
