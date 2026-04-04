@@ -189,7 +189,7 @@ canvas { display: none; }
       <h3 style="font-size:16px;font-weight:700;color:#1e1a16;margin-bottom:6px;">Has agotado tus 5 generaciones gratuitas</h3>
       <p style="font-size:13px;color:#3a3530;line-height:1.5;margin-bottom:14px;">Elige tu plan y sigue generando looks para tus clientes.</p>
       <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window.location.href='https://buy.stripe.com/9B64gA6JecJrertess5wI00'">
+        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="elegirPlan('basico')">
           <div>
             <div style="font-size:13px;font-weight:700;color:#1e1a16;">Básico</div>
             <div style="font-size:11px;color:#888;">200 generaciones / mes</div>
@@ -199,7 +199,7 @@ canvas { display: none; }
             <div style="font-size:10px;color:#b8965a;font-weight:600;">→ Elegir</div>
           </div>
         </div>
-        <div style="background:white;border-radius:12px;padding:14px;border:2px solid #b8965a;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;position:relative;" onclick="window.location.href='https://buy.stripe.com/5kQ7sMgjObFnabdfww5wI01'">
+        <div style="background:white;border-radius:12px;padding:14px;border:2px solid #b8965a;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;position:relative;" onclick="elegirPlan('pro')">
           <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#b8965a;color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;">MÁS POPULAR</div>
           <div>
             <div style="font-size:13px;font-weight:700;color:#1e1a16;">Pro</div>
@@ -210,7 +210,7 @@ canvas { display: none; }
             <div style="font-size:10px;color:#b8965a;font-weight:600;">→ Elegir</div>
           </div>
         </div>
-        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window.location.href='https://buy.stripe.com/8x2fZi3x29xfbfhgAA5wI02'">
+        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="elegirPlan('premium')">
           <div>
             <div style="font-size:13px;font-weight:700;color:#1e1a16;">Premium</div>
             <div style="font-size:11px;color:#888;">1.500 generaciones / mes</div>
@@ -591,25 +591,19 @@ if(urlParams.get('pago') === 'ok'){
   setTimeout(()=>{ alert('¡Suscripción activada! Ya tienes generaciones ilimitadas.'); window.history.replaceState({}, '', window.location.pathname); loadSalon(); }, 500);
 }
 
-async function iniciarPago(){
+async function elegirPlan(plan){
   if(!salon){ alert('Error: no se pudo identificar el salón'); return; }
-  const btn = document.querySelector('#limit-banner button');
-  const originalText = btn.textContent;
-  btn.textContent = 'Redirigiendo...';
-  btn.disabled = true;
   try{
     const r = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ salonId: salon.id, salonSlug: salon.slug, salonNombre: salon.nombre })
+      body: JSON.stringify({ salonId: salon.id, salonSlug: salon.slug, salonNombre: salon.nombre, plan: plan })
     });
     const data = await r.json();
     if(data.url){ window.location.href = data.url; }
     else { throw new Error(data.error || 'Error creando sesión de pago'); }
   }catch(e){
     alert('Error: ' + e.message);
-    btn.textContent = originalText;
-    btn.disabled = false;
   }
 }
 </script>
