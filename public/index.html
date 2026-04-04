@@ -185,13 +185,41 @@ canvas { display: none; }
       <div class="counter-dots" id="counter-dots"></div>
     </div>
     <div id="limit-banner" style="display:none;background:#fff8f8;border:1.5px solid #e8c0bc;border-radius:16px;padding:20px;text-align:center;">
-      <div style="font-size:28px;margin-bottom:10px;">✂️</div>
-      <h3 style="font-size:16px;font-weight:700;color:#1e1a16;margin-bottom:8px;">Has agotado tus 5 generaciones gratuitas</h3>
-      <p style="font-size:13px;color:#3a3530;line-height:1.6;margin-bottom:16px;">Activa el plan mensual y disfruta de generaciones ilimitadas para todos tus clientes.</p>
-      <div style="background:white;border-radius:12px;padding:16px;border:1px solid #f0e0de;">
-        <div style="font-size:28px;font-weight:700;color:#1e1a16;margin-bottom:4px;">24,99€ <span style="font-size:13px;font-weight:400;color:#888;">/ mes · IVA incluido</span></div>
-        <div style="font-size:12px;color:#555;margin-bottom:14px;">Generaciones ilimitadas · Cancela cuando quieras</div>
-        <button onclick="iniciarPago()" style="width:100%;padding:14px;background:#1e1a16;color:#f5e6c8;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">Activar plan mensual →</button>
+      <div style="font-size:28px;margin-bottom:8px;">✂️</div>
+      <h3 style="font-size:16px;font-weight:700;color:#1e1a16;margin-bottom:6px;">Has agotado tus 5 generaciones gratuitas</h3>
+      <p style="font-size:13px;color:#3a3530;line-height:1.5;margin-bottom:14px;">Elige tu plan y sigue generando looks para tus clientes.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window.location.href='https://buy.stripe.com/test_cNi8wQ0kN8X49nHcCx6Vq00'">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1e1a16;">Básico</div>
+            <div style="font-size:11px;color:#888;">200 generaciones / mes</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:16px;font-weight:700;color:#1e1a16;">24,99€<span style="font-size:10px;font-weight:400;color:#888;">/mes</span></div>
+            <div style="font-size:10px;color:#b8965a;font-weight:600;">→ Elegir</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:14px;border:2px solid #b8965a;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;position:relative;" onclick="window.location.href='https://buy.stripe.com/test_fZu4gAaZrc9g6bv9ql6Vq01'">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#b8965a;color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;">MÁS POPULAR</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1e1a16;">Pro</div>
+            <div style="font-size:11px;color:#888;">500 generaciones / mes</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:16px;font-weight:700;color:#1e1a16;">49,99€<span style="font-size:10px;font-weight:400;color:#888;">/mes</span></div>
+            <div style="font-size:10px;color:#b8965a;font-weight:600;">→ Elegir</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:14px;border:1.5px solid #e2dfd9;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window.location.href='https://buy.stripe.com/test_7sYdRac3v4GO0Rb31X6Vq02'">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1e1a16;">Premium</div>
+            <div style="font-size:11px;color:#888;">1.500 generaciones / mes</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:16px;font-weight:700;color:#1e1a16;">99,99€<span style="font-size:10px;font-weight:400;color:#888;">/mes</span></div>
+            <div style="font-size:10px;color:#b8965a;font-weight:600;">→ Elegir</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="src-grid" id="src-grid">
