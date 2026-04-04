@@ -4,94 +4,378 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CortIA — Prueba tu peinado</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+:root {
+  --white: #ffffff;
+  --off-white: #f7f6f3;
+  --gray-50: #f0eeeb;
+  --gray-100: #e2dfd9;
+  --gray-200: #c8c4bc;
+  --gray-300: #a09a90;
+  --gray-400: #7a7268;
+  --gray-700: #3a3530;
+  --gray-900: #1e1a16;
+  --accent: #2a2a2a;
+  --gold: #b8965a;
+  --gold-light: #e8d5b0;
+  --gold-pale: #faf5ec;
+  --teal: #4a9b8e;
+  --teal-light: #e0f0ee;
+  --rose: #c4706a;
+  --rose-light: #f5e8e7;
+  --slate: #5a6e7a;
+  --slate-light: #e5edf0;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f4f1ec; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
-#app { max-width: 430px; width: 100%; background: #fff; min-height: 100vh; display: flex; flex-direction: column; padding: 16px; gap: 14px; }
-.screen { display: none; flex-direction: column; gap: 14px; }
+body {
+  background: var(--gray-50);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+#app {
+  max-width: 440px;
+  width: 100%;
+  background: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+.screen { display: none; flex-direction: column; gap: 16px; padding: 16px; padding-bottom: 80px; }
 .screen.active { display: flex; }
-.header { text-align: center; padding: 10px 0 2px; }
-.logo-mark { width: 44px; height: 44px; border-radius: 14px; background: #1a1a2e; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 7px; }
-h1 { font-size: 24px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px; }
-.header p { font-size: 13px; color: #888; margin-top: 3px; }
-.step-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: all 0.25s; }
-.dot.active { background: #c9a96e; width: 22px; border-radius: 3px; }
-.dot.done { background: #1a1a2e; }
+
+/* HEADER */
+.app-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-100);
+  padding: 20px 16px 16px;
+  text-align: center;
+  position: relative;
+}
+.app-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--teal) 50%, var(--rose) 100%);
+}
+.logo-wrap { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+.logo-icon {
+  width: 42px; height: 42px;
+  background: var(--gray-900);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.app-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: var(--gray-900);
+  letter-spacing: -0.5px;
+}
+.app-subtitle { font-size: 12px; color: var(--gray-300); margin-top: 2px; letter-spacing: 0.3px; }
+
+/* STEP DOTS */
+.step-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 0 4px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-100); transition: all 0.3s; }
+.dot.active { background: var(--gold); width: 24px; border-radius: 3px; }
+.dot.done { background: var(--gray-300); }
+
+/* CARDS */
+.card {
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-inset {
+  background: var(--off-white);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+/* SOURCE GRID */
 .src-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.src-btn { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 22px 10px; border-radius: 14px; border: 1.5px solid #ede8de; background: #faf8f4; cursor: pointer; transition: all 0.15s; color: #1a1a2e; -webkit-tap-highlight-color: transparent; }
-.src-btn:active { border-color: #c9a96e; transform: scale(0.97); }
-.src-btn svg { width: 28px; height: 28px; color: #c9a96e; }
-.src-btn span { font-size: 14px; font-weight: 600; }
-.src-btn small { font-size: 11px; color: #888; text-align: center; }
-.cam-box { border-radius: 16px; border: 1px solid #ede8de; background: #faf8f4; overflow: hidden; aspect-ratio: 3/4; position: relative; display: flex; align-items: center; justify-content: center; }
+.src-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 24px 12px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--gray-100);
+  background: var(--off-white);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--gray-900);
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.src-btn:active { transform: scale(0.96); border-color: var(--gold); background: var(--gold-pale); }
+.src-btn .src-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.src-btn:first-child .src-icon { background: var(--slate-light); }
+.src-btn:last-child .src-icon { background: var(--teal-light); }
+.src-btn svg { width: 24px; height: 24px; }
+.src-btn:first-child svg { color: var(--slate); }
+.src-btn:last-child svg { color: var(--teal); }
+.src-btn span { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+.src-btn small { font-size: 11px; color: var(--gray-300); text-align: center; }
+
+/* CAMERA */
+.cam-box {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-100);
+  background: var(--gray-50);
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-md);
+}
 #video { width: 100%; height: 100%; object-fit: cover; display: none; }
 #prev { width: 100%; height: 100%; object-fit: cover; display: none; }
-.cam-ph { display: flex; flex-direction: column; align-items: center; gap: 10px; color: #bbb; }
-.cam-ph svg { width: 50px; height: 50px; }
-.face-g { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-60%); width: 175px; height: 215px; border: 2px dashed rgba(201,169,110,0.6); border-radius: 50% 50% 40% 40%; pointer-events: none; }
-.g-lbl { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; padding: 4px 12px; border-radius: 20px; white-space: nowrap; pointer-events: none; }
-.cap-row { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 4px 0; }
-.cap-btn { width: 74px; height: 74px; border-radius: 50%; border: 3px solid #c9a96e; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
-.cap-btn:active { transform: scale(0.92); }
-.cap-inner { width: 56px; height: 56px; border-radius: 50%; background: #1a1a2e; }
-.side-act { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 70px; -webkit-tap-highlight-color: transparent; }
-.side-ico { width: 48px; height: 48px; border-radius: 50%; border: 1px solid #ede8de; background: #faf8f4; display: flex; align-items: center; justify-content: center; color: #888; }
-.side-lbl { font-size: 10px; color: #888; }
+.cam-ph { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--gray-200); }
+.cam-ph svg { width: 52px; height: 52px; }
+.cam-ph span { font-size: 13px; }
+.face-g {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-60%);
+  width: 178px; height: 218px;
+  border: 2px dashed rgba(184,150,90,0.5);
+  border-radius: 50% 50% 42% 42%;
+  pointer-events: none;
+}
+.g-lbl {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(30,26,22,0.6); color: #fff; font-size: 11px;
+  padding: 5px 14px; border-radius: 20px; white-space: nowrap; pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+/* CAPTURE ROW */
+.cap-row { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 4px 0; }
+.cap-btn {
+  width: 76px; height: 76px; border-radius: 50%;
+  border: 3px solid var(--gold);
+  background: var(--white);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 0 0 6px var(--gold-pale);
+}
+.cap-btn:active { transform: scale(0.91); }
+.cap-inner { width: 58px; height: 58px; border-radius: 50%; background: var(--gray-900); }
+.side-act { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 68px; -webkit-tap-highlight-color: transparent; }
+.side-ico {
+  width: 50px; height: 50px; border-radius: 50%;
+  border: 1px solid var(--gray-100);
+  background: var(--off-white);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-300);
+  box-shadow: var(--shadow-sm);
+}
+.side-lbl { font-size: 10px; color: var(--gray-300); font-weight: 500; }
+
+/* BUTTONS */
 .btn-row { display: flex; gap: 10px; }
-.btn { flex: 1; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: #fff; color: #1a1a2e; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.btn {
+  flex: 1; padding: 13px; border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--gray-100);
+  background: var(--white); color: var(--gray-700);
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: var(--shadow-sm);
+}
 .btn:active { transform: scale(0.97); }
-.btn-p { background: #1a1a2e; color: #f5e6c8; border-color: #1a1a2e; }
-.btn-a { background: #c9a96e; color: #1a1a2e; border-color: #c9a96e; font-size: 15px; }
-.sec-lbl { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-.gen-row { display: flex; gap: 8px; }
-.gen-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #ede8de; background: #faf8f4; font-size: 13px; font-weight: 600; cursor: pointer; color: #1a1a2e; -webkit-tap-highlight-color: transparent; }
-.gen-btn.sel { border-color: #c9a96e; background: #fdf5e6; }
+.btn-p { background: var(--gray-900); color: var(--gold-light); border-color: var(--gray-900); }
+.btn-a {
+  background: linear-gradient(135deg, var(--gold) 0%, #a07840 100%);
+  color: #fff; border-color: transparent;
+  font-size: 15px; letter-spacing: 0.2px;
+  box-shadow: 0 4px 12px rgba(184,150,90,0.3);
+}
+
+/* SECTION LABELS */
+.sec-lbl {
+  font-size: 10px; font-weight: 600; color: var(--gray-300);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-lbl::after { content: ''; flex: 1; height: 1px; background: var(--gray-100); }
+
+/* GENDER TABS */
+.gen-row { display: flex; gap: 0; background: var(--gray-50); border-radius: var(--radius-md); padding: 3px; border: 1px solid var(--gray-100); }
+.gen-btn {
+  flex: 1; padding: 9px 6px; border-radius: var(--radius-sm);
+  border: none; background: transparent;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  color: var(--gray-300); transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+.gen-btn.sel { background: var(--white); color: var(--gray-900); box-shadow: var(--shadow-sm); }
+
+/* STYLE GRID */
 .sty-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-.sty-card { border-radius: 12px; border: 1.5px solid #ede8de; background: #faf8f4; padding: 10px 6px 8px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
-.sty-card:active { transform: scale(0.95); }
-.sty-card.sel { border-color: #c9a96e; background: #fdf5e6; }
-.sty-e { font-size: 28px; line-height: 1; margin-bottom: 5px; display: block; }
-.sty-n { font-size: 11px; font-weight: 600; color: #1a1a2e; display: block; }
-.sty-s { font-size: 10px; color: #888; display: block; margin-top: 2px; }
-.res-box { border-radius: 16px; border: 1px solid #ede8de; background: #faf8f4; overflow: hidden; aspect-ratio: 3/4; position: relative; display: flex; align-items: center; justify-content: center; }
+.sty-card {
+  border-radius: var(--radius-md); border: 1.5px solid var(--gray-100);
+  background: var(--off-white); padding: 12px 6px 10px;
+  cursor: pointer; text-align: center; transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.sty-card:active { transform: scale(0.94); }
+.sty-card.sel { border-color: var(--gold); background: var(--gold-pale); box-shadow: 0 2px 8px rgba(184,150,90,0.2); }
+.sty-e { font-size: 28px; line-height: 1; margin-bottom: 6px; display: block; }
+.sty-n { font-size: 11px; font-weight: 600; color: var(--gray-700); display: block; }
+.sty-s { font-size: 10px; color: var(--gray-300); display: block; margin-top: 2px; }
+
+/* COLOR SECTION */
+.color-accordion {
+  border: 1.5px solid var(--rose-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.color-accordion summary {
+  padding: 12px 14px;
+  background: var(--rose-light);
+  font-size: 13px; font-weight: 600; color: var(--rose);
+  cursor: pointer; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.color-accordion summary::after { content: '▾'; font-size: 12px; }
+.color-accordion[open] summary::after { content: '▴'; }
+.color-accordion summary::-webkit-details-marker { display: none; }
+.color-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  padding: 12px;
+  background: var(--white);
+}
+.color-card {
+  border-radius: var(--radius-md); border: 1.5px solid var(--gray-100);
+  background: var(--off-white); padding: 10px 4px 8px;
+  cursor: pointer; text-align: center; transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.color-card.sel { border-color: var(--rose); background: var(--rose-light); }
+.color-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  margin: 0 auto 6px; border: 2px solid rgba(0,0,0,0.08);
+}
+.color-name { font-size: 10px; font-weight: 600; color: var(--gray-700); display: block; }
+
+/* RESULT */
+.res-box {
+  border-radius: var(--radius-lg); border: 1px solid var(--gray-100);
+  background: var(--gray-50); overflow: hidden; aspect-ratio: 3/4;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-md);
+}
 .res-box img.result-photo { width: 100%; height: 100%; object-fit: cover; display: none; }
-.loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px; text-align: center; }
-.spin { width: 44px; height: 44px; border: 3px solid #ede8de; border-top-color: #c9a96e; border-radius: 50%; animation: sp 0.85s linear infinite; }
+.loading { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 32px 24px; text-align: center; }
+.spin-wrap { position: relative; width: 56px; height: 56px; }
+.spin {
+  width: 56px; height: 56px;
+  border: 3px solid var(--gray-100);
+  border-top-color: var(--gold);
+  border-right-color: var(--teal);
+  border-radius: 50%; animation: sp 1s linear infinite;
+}
 @keyframes sp { to { transform: rotate(360deg); } }
-.loading strong { font-size: 16px; font-weight: 700; color: #1a1a2e; }
-.loading p { font-size: 13px; color: #888; line-height: 1.5; }
-.steps { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.step-item { font-size: 12px; color: #bbb; display: flex; align-items: center; gap: 8px; }
-.step-item.active { color: #c9a96e; font-weight: 600; }
-.step-item.done { color: #3aaa3a; }
-.step-item::before { content: '○'; font-size: 10px; flex-shrink: 0; }
+.loading strong { font-size: 16px; font-weight: 600; color: var(--gray-900); font-family: 'DM Serif Display', serif; }
+.loading p { font-size: 13px; color: var(--gray-300); line-height: 1.6; }
+.steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; width: 100%; }
+.step-item { font-size: 12px; color: var(--gray-200); display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: var(--radius-sm); }
+.step-item.active { color: var(--gold); font-weight: 600; background: var(--gold-pale); }
+.step-item.done { color: var(--teal); background: var(--teal-light); }
+.step-item::before { content: '○'; font-size: 11px; flex-shrink: 0; }
 .step-item.active::before { content: '●'; }
-.step-item.done::before { content: '✓'; }
-.result-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 30px 16px 16px; display: none; }
-.result-badge { display: inline-block; background: #c9a96e; color: #1a1a2e; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 6px; }
-.result-desc { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.5; }
-.ana-card { background: #faf8f4; border: 1px solid #ede8de; border-radius: 14px; padding: 14px 16px; }
-.ana-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 9px; color: #1a1a2e; }
-.ana-card p { font-size: 13px; color: #555; line-height: 1.65; }
-.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
-.chip { background: #fff; border: 1px solid #ede8de; border-radius: 20px; padding: 5px 11px; font-size: 11px; color: #666; }
+.step-item.done::before { content: '✓'; font-weight: 700; }
+
+.result-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(20,16,12,0.75));
+  padding: 36px 16px 18px; display: none;
+}
+.result-badge {
+  display: inline-block; background: var(--gold); color: #fff;
+  font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 6px;
+}
+.result-desc { font-size: 13px; color: rgba(255,255,255,0.88); line-height: 1.5; }
+
+/* ANALYSIS */
+.ana-card {
+  background: var(--off-white); border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg); padding: 16px;
+  border-left: 3px solid var(--gold);
+}
+.ana-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--gray-900); }
+.ana-card p { font-size: 13px; color: var(--gray-400); line-height: 1.7; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.chip {
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 11px; color: var(--gray-400);
+  box-shadow: var(--shadow-sm);
+}
+
+/* FOOTER */
+.app-footer {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  background: var(--white);
+  border-top: 1px solid var(--gray-100);
+  padding: 10px 16px 14px;
+  text-align: center;
+  font-size: 11px; color: var(--gray-200);
+  letter-spacing: 0.3px;
+  z-index: 10;
+}
+.app-footer span { color: var(--gray-300); font-weight: 500; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--gray-100); margin: 2px 0; }
+
 #file-in { display: none; }
 canvas { display: none; }
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="header">
-    <div class="logo-mark">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5">
-        <path d="M12 2C9 2 7 4 7 7c0 2 1 3.5 2.5 4.5C8 13 7 15 7 17h10c0-2-1-4-2.5-5.5C16 10.5 17 9 17 7c0-3-2-5-5-5z"/>
-        <path d="M9 17v2a3 3 0 0 0 6 0v-2"/><path d="M7 7h10"/>
-      </svg>
+
+  <div class="app-header">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b8965a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+          <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+          <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+          <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <span class="app-title">CortIA</span>
     </div>
-    <h1>CortIA</h1>
-    <p>Prueba tu peinado con IA — resultado visual real</p>
+    <div class="app-subtitle">Prueba tu peinado · Resultado visual real con IA</div>
   </div>
+
   <div class="step-row">
     <div class="dot active" id="d1"></div>
     <div class="dot" id="d2"></div>
@@ -102,43 +386,52 @@ canvas { display: none; }
   <div id="s-cam" class="screen active">
     <div class="src-grid" id="src-grid">
       <div class="src-btn" id="open-cam">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <div class="src-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
         <span>Hacer selfie</span>
         <small>Abre la cámara</small>
       </div>
       <label class="src-btn" for="file-in">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span>Galería de fotos</span>
+        <div class="src-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <span>Galería</span>
         <small>Elige una foto existente</small>
       </label>
     </div>
+
     <div class="cam-box" id="cam-box" style="display:none;">
       <video id="video" autoplay playsinline muted></video>
       <img id="prev" alt=""/>
       <canvas id="canv"></canvas>
       <div class="cam-ph" id="cam-ph" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span style="font-size:13px;">Cargando cámara...</span>
+        <span>Cargando cámara...</span>
       </div>
       <div id="cam-ov" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;">
-        <div class="face-g"></div><div class="g-lbl">Centra tu cara aquí</div>
+        <div class="face-g"></div>
+        <div class="g-lbl">Centra tu cara aquí</div>
       </div>
     </div>
+
     <div class="cap-row" id="cap-row" style="display:none;">
       <label class="side-act" for="file-in">
-        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
         <span class="side-lbl">Galería</span>
       </label>
       <button class="cap-btn" id="cap-btn"><div class="cap-inner"></div></button>
       <div class="side-act" id="flip-btn">
-        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
+        <div class="side-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
         <span class="side-lbl">Girar</span>
       </div>
     </div>
+
     <div class="btn-row" id="photo-acts" style="display:none;">
       <button class="btn" id="retake-btn">← Repetir</button>
       <button class="btn btn-p" id="use-btn">Usar esta foto →</button>
     </div>
+
     <input type="file" id="file-in" accept="image/*">
   </div>
 
@@ -146,12 +439,21 @@ canvas { display: none; }
   <div id="s-style" class="screen">
     <p class="sec-lbl">Género</p>
     <div class="gen-row" id="gen-row">
-      <button class="gen-btn sel" data-g="hombre">Hombre</button>
-      <button class="gen-btn" data-g="mujer">Mujer</button>
-      <button class="gen-btn" data-g="neutro">Neutro</button>
+      <button class="gen-btn sel" data-g="hombre">✂ Hombre</button>
+      <button class="gen-btn" data-g="mujer">✦ Mujer</button>
+      <button class="gen-btn" data-g="neutro">◈ Neutro</button>
     </div>
-    <p class="sec-lbl">Elige un estilo</p>
+
+    <p class="sec-lbl">Estilo de corte</p>
     <div class="sty-grid" id="sty-grid"></div>
+
+    <div id="color-section" style="display:none;">
+      <details class="color-accordion" id="color-details">
+        <summary>🎨 Cambiar color de pelo</summary>
+        <div class="color-grid" id="color-grid"></div>
+      </details>
+    </div>
+
     <div class="btn-row">
       <button class="btn" id="back-btn">← Volver</button>
       <button class="btn btn-a" id="gen-btn">✦ Generar peinado</button>
@@ -162,9 +464,9 @@ canvas { display: none; }
   <div id="s-result" class="screen">
     <div class="res-box" id="res-box">
       <div class="loading" id="loading">
-        <div class="spin"></div>
+        <div class="spin-wrap"><div class="spin"></div></div>
         <strong>Generando tu nuevo look...</strong>
-        <p>La IA está aplicando el peinado a tu foto.</p>
+        <p>La IA está aplicando el peinado a tu foto real.</p>
         <div class="steps">
           <div class="step-item active" id="step1">Subiendo tu foto...</div>
           <div class="step-item" id="step2">Aplicando el peinado con IA...</div>
@@ -187,6 +489,9 @@ canvas { display: none; }
       <button class="btn btn-p" id="newphoto-btn">Nueva foto</button>
     </div>
   </div>
+
+  <footer class="app-footer">© 2025 <span>JobWin</span> · CortIA · Todos los derechos reservados
+  </footer>
 </div>
 
 <script>
@@ -201,32 +506,68 @@ const STYLES = {
     {id:'curtains',name:'Cortinillas',sub:'Años 90',e:'🪄',fal:'middle_part'},
     {id:'textured',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
     {id:'mullet',name:'Mullet',sub:'Tendencia',e:'🔥',fal:'medium_long_hair'},
+    {id:'mohawk',name:'Mohawk',sub:'Atrevido',e:'🤘',fal:'mohawk'},
+    {id:'sidepart',name:'Raya lateral',sub:'Clásico',e:'🕴️',fal:'side_part'},
+    {id:'fringe',name:'Flequillo',sub:'Con fleco',e:'🫧',fal:'bangs'},
+    {id:'long',name:'Melena larga',sub:'Largo',e:'🦁',fal:'long_hair'},
+    {id:'dreadlocks',name:'Dreadlocks',sub:'Libre',e:'🌿',fal:'dreadlocks'},
+    {id:'bun_m',name:'Moño man',sub:'Recogido',e:'🧢',fal:'bun'},
   ],
   mujer:[
     {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
     {id:'lob',name:'Lob',sub:'Media melena',e:'🌸',fal:'medium_long_hair'},
     {id:'pixie',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
     {id:'layers',name:'Capas',sub:'Movimiento',e:'🌊',fal:'wavy_hair'},
-    {id:'bangs',name:'Flequillo',sub:'Con fleco',e:'✨',fal:'bangs'},
-    {id:'balayage',name:'Balayage',sub:'Con color',e:'🎨',fal:'long_hair'},
+    {id:'bangs',name:'Flequillo recto',sub:'Con fleco',e:'✨',fal:'bangs'},
     {id:'wolf',name:'Wolf Cut',sub:'Tendencia',e:'🐺',fal:'wavy_hair'},
     {id:'curtainbangs',name:'Flequillo cortina',sub:'Bohemio',e:'🌺',fal:'bangs'},
     {id:'bun',name:'Moño alto',sub:'Recogido',e:'👑',fal:'bun'},
+    {id:'straight',name:'Liso',sub:'Sedoso',e:'💫',fal:'straight_hair'},
+    {id:'curly',name:'Rizado',sub:'Natural',e:'🌀',fal:'curly_hair'},
+    {id:'ponytail',name:'Cola alta',sub:'Recogido',e:'🎀',fal:'high_ponytail'},
+    {id:'braids',name:'Trenzas',sub:'Bohemio',e:'🧶',fal:'braids'},
+    {id:'shag',name:'Shag',sub:'Retro',e:'🎸',fal:'wavy_hair'},
+    {id:'long_w',name:'Melena larga',sub:'Clásico',e:'🦋',fal:'long_hair'},
+    {id:'afro_w',name:'Afro',sub:'Natural',e:'🌟',fal:'afro'},
   ],
   neutro:[
-    {id:'buzz',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
-    {id:'textured',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
-    {id:'pixie',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
-    {id:'mohawk',name:'Mohawk',sub:'Atrevido',e:'🤘',fal:'mohawk'},
-    {id:'wolf',name:'Wolf Cut',sub:'Edgy',e:'🐺',fal:'wavy_hair'},
-    {id:'braids',name:'Trenzas',sub:'Original',e:'🧶',fal:'braids'},
-    {id:'bob',name:'Bob',sub:'Geométrico',e:'💎',fal:'bob_cut'},
-    {id:'afro',name:'Afro',sub:'Volumen total',e:'🌟',fal:'afro'},
-    {id:'dreadlocks',name:'Dreadlocks',sub:'Libre',e:'🦁',fal:'dreadlocks'},
+    {id:'buzz_n',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
+    {id:'textured_n',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
+    {id:'pixie_n',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
+    {id:'mohawk_n',name:'Mohawk',sub:'Atrevido',e:'🤘',fal:'mohawk'},
+    {id:'wolf_n',name:'Wolf Cut',sub:'Edgy',e:'🐺',fal:'wavy_hair'},
+    {id:'braids_n',name:'Trenzas',sub:'Original',e:'🧶',fal:'braids'},
+    {id:'bob_n',name:'Bob',sub:'Geométrico',e:'💎',fal:'bob_cut'},
+    {id:'afro_n',name:'Afro',sub:'Volumen total',e:'🌟',fal:'afro'},
+    {id:'dread_n',name:'Dreadlocks',sub:'Libre',e:'🦁',fal:'dreadlocks'},
+    {id:'shag_n',name:'Shag',sub:'Desenfadado',e:'🎸',fal:'wavy_hair'},
+    {id:'long_n',name:'Pelo largo',sub:'Natural',e:'🌿',fal:'long_hair'},
+    {id:'ponytail_n',name:'Cola de caballo',sub:'Recogido',e:'🎀',fal:'high_ponytail'},
   ]
 };
 
-let photo=null, style=null, gender='hombre', stream=null, facing='user';
+const HAIR_COLORS = [
+  {id:'natural',name:'Natural',color:'#8B6914',fal:'natural'},
+  {id:'black',name:'Negro',color:'#1a1a1a',fal:'black'},
+  {id:'dark_brown',name:'Castaño oscuro',color:'#3d1c02',fal:'dark_brown'},
+  {id:'light_brown',name:'Castaño claro',color:'#8B4513',fal:'light_brown'},
+  {id:'blonde',name:'Rubio',color:'#e8c96a',fal:'blonde'},
+  {id:'platinum',name:'Platino',color:'#f0ead6',fal:'platinum_blonde'},
+  {id:'red',name:'Rojo',color:'#c0392b',fal:'red'},
+  {id:'auburn',name:'Cobrizo',color:'#922B21',fal:'auburn'},
+  {id:'gray',name:'Gris',color:'#95a5a6',fal:'gray'},
+  {id:'silver',name:'Plateado',color:'#bdc3c7',fal:'silver'},
+  {id:'blue',name:'Azul',color:'#2980b9',fal:'blue'},
+  {id:'purple',name:'Morado',color:'#8e44ad',fal:'purple'},
+  {id:'pink',name:'Rosa',color:'#e91e8c',fal:'pink'},
+  {id:'green',name:'Verde',color:'#27ae60',fal:'green'},
+  {id:'rainbow',name:'Arcoíris',color:'linear-gradient(90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6)',fal:'rainbow'},
+  {id:'ombre',name:'Ombré',color:'linear-gradient(180deg,#3d1c02,#e8c96a)',fal:'ombre'},
+  {id:'highlights',name:'Mechas',color:'linear-gradient(90deg,#8B4513,#f0d060)',fal:'highlights'},
+  {id:'balayage',name:'Balayage',color:'linear-gradient(180deg,#5c3317,#d4a84b)',fal:'balayage'},
+];
+
+let photo=null, style=null, hairColor='natural', gender='hombre', stream=null, facing='user';
 
 function setScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -243,6 +584,19 @@ function renderStyles(){
     c.innerHTML=`<span class="sty-e">${s.e}</span><span class="sty-n">${s.name}</span><span class="sty-s">${s.sub}</span>`;
     c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
     g.appendChild(c);
+  });
+  // Show color section only for women
+  document.getElementById('color-section').style.display = gender==='mujer' ? 'block' : 'none';
+}
+
+function renderColors(){
+  const g=document.getElementById('color-grid'); g.innerHTML='';
+  HAIR_COLORS.forEach(c=>{
+    const el=document.createElement('div'); el.className='color-card'+(hairColor===c.id?' sel':'');
+    const swatchStyle = c.color.startsWith('linear') ? `background:${c.color}` : `background:${c.color}`;
+    el.innerHTML=`<div class="color-swatch" style="${swatchStyle}"></div><span class="color-name">${c.name}</span>`;
+    el.onclick=()=>{ hairColor=c.id; document.querySelectorAll('.color-card').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); };
+    g.appendChild(el);
   });
 }
 
@@ -295,16 +649,17 @@ document.getElementById('file-in').onchange=(e)=>{
 document.getElementById('retake-btn').onclick=()=>{
   photo=null; document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid';
 };
-document.getElementById('use-btn').onclick=()=>{ if(!photo)return; setScreen('style'); renderStyles(); };
+document.getElementById('use-btn').onclick=()=>{ if(!photo)return; setScreen('style'); renderStyles(); renderColors(); };
+
 document.getElementById('gen-row').querySelectorAll('.gen-btn').forEach(b=>{
-  b.onclick=()=>{ document.querySelectorAll('.gen-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); gender=b.dataset.g; style=null; renderStyles(); };
+  b.onclick=()=>{ document.querySelectorAll('.gen-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); gender=b.dataset.g; style=null; hairColor='natural'; renderStyles(); renderColors(); };
 });
 document.getElementById('back-btn').onclick=()=>setScreen('cam');
 
 function setStep(n){ [1,2,3].forEach(i=>{ const el=document.getElementById('step'+i); el.classList.remove('active','done'); if(i<n)el.classList.add('done'); else if(i===n)el.classList.add('active'); }); }
 
 document.getElementById('gen-btn').onclick=async()=>{
-  if(!style){ alert('Elige un estilo primero'); return; }
+  if(!style){ alert('Elige un estilo de peinado primero'); return; }
   setScreen('result');
   document.getElementById('loading').style.display='flex';
   document.getElementById('result-photo').style.display='none';
@@ -315,6 +670,8 @@ document.getElementById('gen-btn').onclick=async()=>{
   const sData=STYLES[gender].find(s=>s.id===style);
   const label=sData?.name||style;
   const falStyle=sData?.fal||'short_hair';
+  const colorData=HAIR_COLORS.find(c=>c.id===hairColor);
+  const falColor=colorData?.fal||'natural';
   const b64=photo.split(',')[1];
 
   try{
@@ -322,33 +679,39 @@ document.getElementById('gen-btn').onclick=async()=>{
     const res=await fetch('/api/generate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, styleLabel:label})
+      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, hairColor:falColor, styleLabel:label})
     });
     const data=await res.json();
     if(!res.ok||!data.success) throw new Error(data.error||'Error desconocido');
-
     setStep(3);
-    await new Promise(r=>setTimeout(r,500));
-
+    await new Promise(r=>setTimeout(r,400));
     document.getElementById('loading').style.display='none';
     const img=document.getElementById('result-photo');
     img.src=data.resultUrl; img.style.display='block';
-    img.onload=()=>{ document.getElementById('result-badge').textContent=label; document.getElementById('result-desc').textContent='Tu nuevo look generado con IA'; document.getElementById('result-label').style.display='block'; };
-
+    img.onload=()=>{ document.getElementById('result-badge').textContent=label+(hairColor!=='natural'?' · '+colorData?.name:''); document.getElementById('result-desc').textContent='Generado con IA · CortIA by JobWin'; document.getElementById('result-label').style.display='block'; };
     document.getElementById('ana-card').style.display='block';
     document.getElementById('ana-txt').textContent='💬 Dile a tu peluquero: "'+data.analysis.instrucciones+'"';
     const chips=document.getElementById('chips'); chips.innerHTML='';
     (data.analysis.tips||[]).forEach(t=>{ const ch=document.createElement('span'); ch.className='chip'; ch.textContent=t; chips.appendChild(ch); });
   }catch(err){
-    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;"><div style="font-size:36px;">⚠️</div><strong style="font-size:15px;color:#1a1a2e;">Error al generar</strong><p style="font-size:13px;color:#888;line-height:1.5;max-width:280px;">${err.message}</p><button onclick="document.getElementById('other-btn').click()" style="padding:10px 22px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Volver</button></div>`;
+    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;"><div style="font-size:40px;">⚠️</div><strong style="font-size:15px;color:#1e1a16;font-family:'DM Serif Display',serif;">Error al generar</strong><p style="font-size:13px;color:#a09a90;line-height:1.5;max-width:280px;">${err.message}</p><button onclick="document.getElementById('other-btn').click()" style="padding:11px 24px;border-radius:10px;border:1px solid #e2dfd9;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Volver</button></div>`;
   }
 };
 
-function resetResult(){ document.getElementById('loading').style.display='flex'; document.getElementById('loading').innerHTML=`<div class="spin"></div><strong>Generando tu nuevo look...</strong><p>La IA está aplicando el peinado a tu foto.</p><div class="steps"><div class="step-item active" id="step1">Subiendo tu foto...</div><div class="step-item" id="step2">Aplicando el peinado con IA...</div><div class="step-item" id="step3">Analizando el resultado...</div></div>`; document.getElementById('result-photo').style.display='none'; document.getElementById('result-label').style.display='none'; }
+function resetResult(){
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('loading').innerHTML=`<div class="spin-wrap"><div class="spin"></div></div><strong>Generando tu nuevo look...</strong><p>La IA está aplicando el peinado a tu foto real.</p><div class="steps"><div class="step-item active" id="step1">Subiendo tu foto...</div><div class="step-item" id="step2">Aplicando el peinado con IA...</div><div class="step-item" id="step3">Analizando el resultado...</div></div>`;
+  document.getElementById('result-photo').style.display='none';
+  document.getElementById('result-label').style.display='none';
+}
 document.getElementById('other-btn').onclick=()=>{ resetResult(); setScreen('style'); };
-document.getElementById('newphoto-btn').onclick=()=>{ photo=null; style=null; resetResult(); document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid'; setScreen('cam'); };
+document.getElementById('newphoto-btn').onclick=()=>{
+  photo=null; style=null; hairColor='natural'; resetResult();
+  document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid';
+  setScreen('cam');
+};
 
-renderStyles();
+renderStyles(); renderColors();
 </script>
 </body>
 </html>
