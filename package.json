@@ -1,6 +1,5 @@
 {
   "name": "cortia-app",
-  "version": "1.0.0",
-  "description": "CortIA - Prueba tu peinado con IA",
+  "version": "2.0.0",
   "private": true
 }
