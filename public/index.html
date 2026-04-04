@@ -588,7 +588,7 @@ function renderStyles(){
     g.appendChild(c);
   });
   // Show color section only for women
-  document.getElementById('color-section').style.display = gender==='mujer' ? 'block' : 'none';
+  document.getElementById('color-section').style.display = (gender==='mujer' || gender==='neutro') ? 'block' : 'none';
 }
 
 function renderColors(){
@@ -681,7 +681,7 @@ document.getElementById('gen-btn').onclick=async()=>{
     const res=await fetch('/api/generate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, hairColor:falColor, styleLabel:label})
+      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, hairColor:falColor!=='natural'?falColor:null, styleLabel:label})
     });
     const data=await res.json();
     if(!res.ok||!data.success) throw new Error(data.error||'Error desconocido');
@@ -690,7 +690,7 @@ document.getElementById('gen-btn').onclick=async()=>{
     document.getElementById('loading').style.display='none';
     const img=document.getElementById('result-photo');
     img.src=data.resultUrl; img.style.display='block';
-    img.onload=()=>{ document.getElementById('result-badge').textContent=label+(hairColor!=='natural'?' · '+colorData?.name:''); document.getElementById('result-desc').textContent='Generado con IA · CortIA by JobWin'; document.getElementById('result-label').style.display='block'; };
+    img.onload=()=>{ document.getElementById('result-badge').textContent=label+(hairColor&&hairColor!=='natural'?' · '+colorData?.name:''); document.getElementById('result-desc').textContent='Generado con IA · CortIA by JobWin'; document.getElementById('result-label').style.display='block'; };
     document.getElementById('ana-card').style.display='block';
     document.getElementById('ana-txt').textContent='💬 Dile a tu peluquero: "'+data.analysis.instrucciones+'"';
     const chips=document.getElementById('chips'); chips.innerHTML='';
