@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CortIA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #f0eeeb; min-height: 100vh; }
+
+/* LOGIN */
+#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.login-box { background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.10); }
+.login-box h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: #1e1a16; margin-bottom: 6px; }
+.login-box p { font-size: 13px; color: #a09a90; margin-bottom: 28px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: #5a5550; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+.field input { width: 100%; padding: 12px 14px; border: 1.5px solid #e2dfd9; border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.2s; }
+.field input:focus { border-color: #b8965a; }
+.btn-login { width: 100%; padding: 14px; background: #1e1a16; color: #f5e6c8; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-login:hover { background: #3a3530; }
+.login-error { color: #c4706a; font-size: 13px; margin-top: 10px; text-align: center; display: none; }
+
+/* ADMIN */
+#admin-screen { display: none; }
+.topbar { background: #1e1a16; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar h1 { font-family: 'DM Serif Display', serif; font-size: 20px; color: #f5e6c8; }
+.topbar-badge { background: #b8965a; color: white; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+.btn-logout { background: transparent; border: 1px solid #3a3530; color: #a09a90; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; }
+.btn-logout:hover { border-color: #b8965a; color: #f5e6c8; }
+
+.content { padding: 28px; max-width: 1200px; margin: 0 auto; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-label { font-size: 11px; font-weight: 600; color: #a09a90; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.stat-value { font-size: 32px; font-weight: 700; color: #1e1a16; font-family: 'DM Serif Display', serif; }
+.stat-sub { font-size: 12px; color: #a09a90; margin-top: 4px; }
+.stat-card.gold { border-left: 3px solid #b8965a; }
+.stat-card.green { border-left: 3px solid #4a9b8e; }
+.stat-card.rose { border-left: 3px solid #c4706a; }
+.stat-card.slate { border-left: 3px solid #5a6e7a; }
+
+/* SECTION */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-size: 16px; font-weight: 700; color: #1e1a16; }
+.btn-add { background: #1e1a16; color: #f5e6c8; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-add:hover { background: #3a3530; }
+
+/* TABLE */
+.table-wrap { background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f7f6f3; padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600; color: #a09a90; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid #e2dfd9; }
+td { padding: 14px 16px; border-bottom: 1px solid #f0eeeb; font-size: 13px; color: #3a3530; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #faf9f7; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-trial { background: #f0eeeb; color: #7a7268; }
+.badge-basico { background: #e0f0ee; color: #4a9b8e; }
+.badge-pro { background: #faf5ec; color: #b8965a; }
+.badge-premium { background: #f5e8e7; color: #c4706a; }
+
+.progress-bar { background: #f0eeeb; border-radius: 4px; height: 6px; width: 80px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.progress-fill { height: 100%; background: #b8965a; border-radius: 4px; }
+
+.btn-action { background: transparent; border: 1px solid #e2dfd9; color: #5a5550; padding: 5px 10px; border-radius: 7px; cursor: pointer; font-size: 11px; font-family: 'DM Sans', sans-serif; margin-right: 4px; }
+.btn-action:hover { border-color: #b8965a; color: #b8965a; }
+.btn-action.danger:hover { border-color: #c4706a; color: #c4706a; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; }
+.modal h2 { font-size: 18px; font-weight: 700; color: #1e1a16; margin-bottom: 20px; }
+.modal .field { margin-bottom: 14px; }
+.modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+.btn-cancel { flex: 1; padding: 12px; background: #f0eeeb; color: #5a5550; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-save { flex: 2; padding: 12px; background: #1e1a16; color: #f5e6c8; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+.loading-msg { text-align: center; padding: 40px; color: #a09a90; font-size: 14px; }
+select { width: 100%; padding: 12px 14px; border: 1.5px solid #e2dfd9; border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; background: white; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>✂️ CortIA Admin</h1>
+    <p>Panel de gestión de salones</p>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="user-input" placeholder="Usuario" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="pass-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()" />
+    </div>
+    <button class="btn-login" onclick="login()">Entrar al panel →</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>✂️ CortIA Admin</h1>
+      <span class="topbar-badge">JobWin</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">Ingresos mensuales</div>
+        <div class="stat-value" id="stat-ingresos">—</div>
+        <div class="stat-sub">Suscripciones activas</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Clientes activos</div>
+        <div class="stat-value" id="stat-activos">—</div>
+        <div class="stat-sub">Con plan de pago</div>
+      </div>
+      <div class="stat-card rose">
+        <div class="stat-label">En periodo trial</div>
+        <div class="stat-value" id="stat-trial">—</div>
+        <div class="stat-sub">Potenciales clientes</div>
+      </div>
+      <div class="stat-card slate">
+        <div class="stat-label">Generaciones hoy</div>
+        <div class="stat-value" id="stat-gens">—</div>
+        <div class="stat-sub">Total este mes</div>
+      </div>
+    </div>
+
+    <!-- SALONES -->
+    <div class="section-header">
+      <div class="section-title">Salones registrados</div>
+      <button class="btn-add" onclick="abrirModalNuevo()">+ Añadir salón</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Salón</th>
+            <th>Plan</th>
+            <th>Generaciones</th>
+            <th>Ingresos/mes</th>
+            <th>URL</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="salones-tbody">
+          <tr><td colspan="6" class="loading-msg">Cargando salones...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO SALÓN -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <h2>Añadir nuevo salón</h2>
+    <div class="field">
+      <label>Nombre del salón</label>
+      <input type="text" id="new-nombre" placeholder="Ej: Peluquería López" />
+    </div>
+    <div class="field">
+      <label>Slug (URL única)</label>
+      <input type="text" id="new-slug" placeholder="Ej: peluquerialopez" />
+    </div>
+    <div class="field">
+      <label>Email de contacto</label>
+      <input type="email" id="new-email" placeholder="email@salon.com" />
+    </div>
+    <div class="field">
+      <label>Plan inicial</label>
+      <select id="new-plan">
+        <option value="trial">Trial (5 generaciones gratis)</option>
+        <option value="basico">Básico (200 gen/mes · 24,99€)</option>
+        <option value="pro">Pro (500 gen/mes · 49,99€)</option>
+        <option value="premium">Premium (1.500 gen/mes · 99,99€)</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-save" onclick="crearSalon()">Crear salón →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vxxvhikmzddxhsgkdofh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4eHZoaWttemRkeGhzZ2tkb2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDEyNjksImV4cCI6MjA1OTI3NzI2OX0.o4A5i2fMQ_7Nj6bBCiVOvSaM8s4m0yU2rG63u4Sss44';
+
+const PRECIOS = { trial: 0, basico: 24.99, pro: 49.99, premium: 99.99 };
+const LIMITES = { trial: 5, basico: 200, pro: 500, premium: 1500 };
+
+function login() {
+  const user = document.getElementById('user-input').value;
+  const pass = document.getElementById('pass-input').value;
+  if (user === 'Jobwin' && pass === 'tako91!') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    cargarDatos();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('user-input').value = '';
+  document.getElementById('pass-input').value = '';
+}
+
+async function cargarDatos() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/salones?select=*&order=created_at.desc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const salones = await r.json();
+    renderStats(salones);
+    renderTabla(salones);
+  } catch(e) {
+    document.getElementById('salones-tbody').innerHTML = `<tr><td colspan="6" class="loading-msg">Error cargando datos</td></tr>`;
+  }
+}
+
+function renderStats(salones) {
+  const activos = salones.filter(s => s.plan !== 'trial');
+  const trial = salones.filter(s => s.plan === 'trial');
+  const ingresos = activos.reduce((sum, s) => sum + (PRECIOS[s.plan] || 0), 0);
+  const totalGens = salones.reduce((sum, s) => sum + (s.generaciones_mes || 0), 0);
+
+  document.getElementById('stat-ingresos').textContent = ingresos.toFixed(2) + '€';
+  document.getElementById('stat-activos').textContent = activos.length;
+  document.getElementById('stat-trial').textContent = trial.length;
+  document.getElementById('stat-gens').textContent = totalGens;
+}
+
+function renderTabla(salones) {
+  const tbody = document.getElementById('salones-tbody');
+  if (!salones.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-msg">No hay salones registrados</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = salones.map(s => {
+    const usado = s.generaciones_mes || 0;
+    const limite = s.generaciones_limite || LIMITES[s.plan] || 5;
+    const pct = Math.min(100, Math.round((usado / limite) * 100));
+    const ingreso = PRECIOS[s.plan] || 0;
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:600;color:#1e1a16;">${s.nombre}</div>
+          <div style="font-size:11px;color:#a09a90;">${s.email || '—'}</div>
+        </td>
+        <td><span class="badge badge-${s.plan}">${s.plan.toUpperCase()}</span></td>
+        <td>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span style="font-size:12px;">${usado}/${limite}</span>
+        </td>
+        <td style="font-weight:600;color:${ingreso > 0 ? '#4a9b8e' : '#a09a90'};">
+          ${ingreso > 0 ? ingreso.toFixed(2) + '€' : '—'}
+        </td>
+        <td>
+          <a href="https://cortia-app.vercel.app/salon/${s.slug}" target="_blank" style="color:#b8965a;font-size:12px;">/${s.slug} ↗</a>
+        </td>
+        <td>
+          <button class="btn-action" onclick="resetearContador('${s.id}','${s.nombre}')">Reset</button>
+          <button class="btn-action" onclick="cambiarPlan('${s.id}','${s.nombre}','${s.plan}')">Plan</button>
+          <button class="btn-action danger" onclick="eliminarSalon('${s.id}','${s.nombre}')">Eliminar</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+async function resetearContador(id, nombre) {
+  if (!confirm(`¿Resetear el contador de generaciones de ${nombre}?`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ generaciones_mes: 0 })
+  });
+  cargarDatos();
+}
+
+async function cambiarPlan(id, nombre, planActual) {
+  const nuevoPlan = prompt(`Plan actual de ${nombre}: ${planActual}\nEscribe el nuevo plan (trial/basico/pro/premium):`);
+  if (!nuevoPlan || !LIMITES[nuevoPlan]) { alert('Plan no válido'); return; }
+  await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ plan: nuevoPlan, generaciones_limite: LIMITES[nuevoPlan] })
+  });
+  cargarDatos();
+}
+
+async function eliminarSalon(id, nombre) {
+  if (!confirm(`¿Eliminar el salón ${nombre}? Esta acción no se puede deshacer.`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  });
+  cargarDatos();
+}
+
+function abrirModalNuevo() {
+  document.getElementById('modal-nuevo').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-nuevo').classList.remove('open');
+}
+
+async function crearSalon() {
+  const nombre = document.getElementById('new-nombre').value.trim();
+  const slug = document.getElementById('new-slug').value.trim().toLowerCase().replace(/\s+/g, '');
+  const email = document.getElementById('new-email').value.trim();
+  const plan = document.getElementById('new-plan').value;
+
+  if (!nombre || !slug) { alert('Nombre y slug son obligatorios'); return; }
+
+  await fetch(`${SUPABASE_URL}/rest/v1/salones`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      nombre, slug, email,
+      plan, 
+      generaciones_mes: 0,
+      generaciones_limite: LIMITES[plan],
+      color_primario: '#1a1a2e',
+      color_acento: '#c9a96e',
+      activo: true
+    })
+  });
+
+  cerrarModal();
+  cargarDatos();
+  alert(`✅ Salón ${nombre} creado. URL: cortia-app.vercel.app/salon/${slug}`);
+}
+</script>
+</body>
+</html>
