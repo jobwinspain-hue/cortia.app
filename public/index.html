@@ -36,7 +36,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--gray-50);
+  background-color: var(--gray-50);
   font-family: 'DM Sans', -apple-system, sans-serif;
   min-height: 100vh;
   display: flex;
@@ -45,7 +45,8 @@ body {
 #app {
   max-width: 440px;
   width: 100%;
-  background: var(--white);
+  background-color: var(--white);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50'><defs><pattern id='C' x='0' y='0' width='50' height='50' patternUnits='userSpaceOnUse'><rect width='50' height='50' fill='white'/><path d='M25,0 Q50,25 25,50 Q0,25 25,0 Z' fill='none' stroke='%23ebebeb' stroke-width='0.6'/><path d='M0,25 Q25,50 50,25 Q25,0 0,25 Z' fill='none' stroke='%23ebebeb' stroke-width='0.6'/><path d='M25,8 Q42,25 25,42 Q8,25 25,8 Z' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/><path d='M8,25 Q25,42 42,25 Q25,8 8,25 Z' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/><circle cx='25' cy='25' r='4' fill='none' stroke='%23ebebeb' stroke-width='0.5'/><circle cx='0' cy='0' r='3' fill='none' stroke='%23efefef' stroke-width='0.45'/><circle cx='50' cy='0' r='3' fill='none' stroke='%23efefef' stroke-width='0.45'/><circle cx='0' cy='50' r='3' fill='none' stroke='%23efefef' stroke-width='0.45'/><circle cx='50' cy='50' r='3' fill='none' stroke='%23efefef' stroke-width='0.45'/><circle cx='25' cy='0' r='2' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/><circle cx='25' cy='50' r='2' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/><circle cx='0' cy='25' r='2' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/><circle cx='50' cy='25' r='2' fill='none' stroke='%23f0f0f0' stroke-width='0.4'/></pattern></defs><rect width='50' height='50' fill='url(%23C)'/></svg>");
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -53,6 +54,7 @@ body {
   box-shadow: var(--shadow-lg);
 }
 .screen { display: none; flex-direction: column; gap: 16px; padding: 16px; padding-bottom: 80px; }
+.screen > * { position: relative; z-index: 1; }
 .screen.active { display: flex; }
 
 /* HEADER */
