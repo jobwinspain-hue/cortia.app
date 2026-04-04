@@ -9,17 +9,15 @@ async function getRawBody(req) {
   });
 }
 
-// Mapeo de Payment Links a planes y límites
-const PLANES = {
-  'https://buy.stripe.com/test_cNi8wQ0kN8X49nHcCx6Vq00': { plan: 'basico', limite: 200 },
-  'https://buy.stripe.com/test_fZu4gAaZrc9g6bv9ql6Vq01': { plan: 'pro', limite: 500 },
-  'https://buy.stripe.com/test_7sYdRac3v4GO0Rb31X6Vq02': { plan: 'premium', limite: 1500 },
+const LIMITES_POR_PLAN = {
+  basico:  200,
+  pro:     500,
+  premium: 1500,
 };
 
-// También por precio en céntimos
-const PLANES_POR_PRECIO = {
-  2499: { plan: 'basico', limite: 200 },
-  4999: { plan: 'pro', limite: 500 },
+const LIMITES_POR_PRECIO = {
+  2499: { plan: 'basico',  limite: 200  },
+  4999: { plan: 'pro',     limite: 500  },
   9999: { plan: 'premium', limite: 1500 },
 };
 
@@ -32,25 +30,28 @@ export default async function handler(req, res) {
   const rawBody = await getRawBody(req);
 
   let event;
-  try {
-    event = JSON.parse(rawBody);
-  } catch(err) {
-    return res.status(400).json({ error: 'Invalid JSON' });
-  }
+  try { event = JSON.parse(rawBody); }
+  catch(err) { return res.status(400).json({ error: 'Invalid JSON' }); }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const salonId = session.metadata?.salon_id;
+    const planMeta = session.metadata?.plan;
     const subscriptionId = session.subscription;
     const customerId = session.customer;
     const amountTotal = session.amount_total;
 
-    // Determinar plan por precio
-    let planInfo = PLANES_POR_PRECIO[amountTotal] || { plan: 'basico', limite: 200 };
+    // Determinar plan — primero por metadato, luego por precio
+    let planInfo;
+    if (planMeta && LIMITES_POR_PLAN[planMeta]) {
+      planInfo = { plan: planMeta, limite: LIMITES_POR_PLAN[planMeta] };
+    } else {
+      planInfo = LIMITES_POR_PRECIO[amountTotal] || { plan: 'basico', limite: 200 };
+    }
 
     if (salonId) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
+        const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
           method: 'PATCH',
           headers: {
             'apikey': SUPABASE_KEY,
@@ -61,13 +62,18 @@ export default async function handler(req, res) {
           body: JSON.stringify({
             plan: planInfo.plan,
             generaciones_limite: planInfo.limite,
+            generaciones_mes: 0,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId
           })
         });
-        console.log(`Salón ${salonId} actualizado a plan ${planInfo.plan} con ${planInfo.limite} generaciones`);
+        if (updateRes.ok) {
+          console.log(`✅ Salón ${salonId} actualizado: plan=${planInfo.plan}, limite=${planInfo.limite}`);
+        } else {
+          console.error('Error actualizando Supabase:', await updateRes.text());
+        }
       } catch(e) {
-        console.error('Error actualizando salón:', e.message);
+        console.error('Error:', e.message);
       }
     }
   }
@@ -83,8 +89,9 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ plan: 'trial', generaciones_limite: 5 })
+        body: JSON.stringify({ plan: 'trial', generaciones_limite: 5, generaciones_mes: 0 })
       });
+      console.log(`Suscripción ${sub.id} cancelada — salón vuelto a trial`);
     } catch(e) {}
   }
 
