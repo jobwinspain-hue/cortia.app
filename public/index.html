@@ -186,7 +186,7 @@ canvas { display: none; }
     </div>
     <div id="limit-banner" class="limit-banner" style="display:none;">
       <h3>Has agotado tus generaciones gratuitas</h3>
-      <p>Contacta con nosotros para activar tu plan y seguir usando CortIA sin límites.<br><br><a href="/cdn-cgi/l/email-protection#a0c9cec6cfe0cacfc2d7c9ce8ec5d3"><span class="__cf_email__" data-cfemail="99f0f7fff6d9f3f6fbeef0f7b7fcea">[email&#160;protected]</span></a></p>
+      <p>Contacta con nosotros para activar tu plan y seguir usando CortIA sin límites.<br><br><a href="mailto:info@jobwin.es">info@jobwin.es</a></p>
     </div>
     <div class="src-grid" id="src-grid">
       <div class="src-btn" id="open-cam">
@@ -270,7 +270,7 @@ canvas { display: none; }
   <footer class="app-footer">© 2025 <span>JobWin</span> · CortIA · Todos los derechos reservados</footer>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const STYLES = {
   hombre:[
     {id:'undercut',name:'Undercut',sub:'Moderno',e:'💈',fal:'short_hair'},
@@ -545,4 +545,12 @@ function resetResult(){
 document.getElementById('other-btn').onclick=()=>{ resetResult(); setScreen('style'); };
 document.getElementById('newphoto-btn').onclick=()=>{
   photo=null; style=null; hairColor='natural'; resetResult();
-  document.getElementById('prev').style.display='none'; document.getElementById('photo-acts')
+  document.getElementById('prev').style.display='none'; document.getElementById('photo-acts').style.display='none'; document.getElementById('cam-box').style.display='none'; document.getElementById('src-grid').style.display='grid';
+  setScreen('cam');
+};
+
+renderStyles(); renderColors();
+loadSalon();
+</script>
+</body>
+</html>
