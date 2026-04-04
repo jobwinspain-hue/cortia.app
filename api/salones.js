@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/salones?select=*&order=created_at.desc`, {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/salones?select=*`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       });
       const data = await r.json();
