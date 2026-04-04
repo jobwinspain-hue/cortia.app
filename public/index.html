@@ -551,6 +551,36 @@ document.getElementById('newphoto-btn').onclick=()=>{
 
 renderStyles(); renderColors();
 loadSalon();
+
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('pago') === 'ok'){
+  setTimeout(()=>{
+    alert('¡Suscripción activada! Ya tienes generaciones ilimitadas.');
+    window.history.replaceState({}, '', window.location.pathname);
+    loadSalon();
+  }, 500);
+}
+
+async function iniciarPago(){
+  if(!salon){ alert('Error: no se pudo identificar el salón'); return; }
+  const btn = event.target;
+  btn.textContent = 'Redirigiendo...';
+  btn.disabled = true;
+  try{
+    const r = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ salonId: salon.id, salonSlug: salon.slug, salonNombre: salon.nombre })
+    });
+    const data = await r.json();
+    if(data.url){ window.location.href = data.url; }
+    else { throw new Error(data.error || 'Error creando sesión de pago'); }
+  }catch(e){
+    alert('Error: ' + e.message);
+    btn.textContent = 'Activar plan mensual →';
+    btn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
