@@ -222,6 +222,16 @@ canvas { display: none; }
         </div>
       </div>
     </div>
+    <div id="limit-banner-pago" style="display:none;background:#f0f8ff;border:1.5px solid #b8d4e8;border-radius:16px;padding:20px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🗓️</div>
+      <h3 style="font-size:16px;font-weight:700;color:#1e1a16;margin-bottom:6px;">Has agotado tus generaciones este mes</h3>
+      <p style="font-size:13px;color:#3a3530;line-height:1.5;margin-bottom:14px;">Tu plan se renueva automáticamente el día 1 del próximo mes con todas tus generaciones disponibles.</p>
+      <div style="background:white;border-radius:12px;padding:14px;border:1px solid #d0e4f0;">
+        <div style="font-size:13px;color:#5a5550;margin-bottom:10px;">¿Necesitas más generaciones ahora?</div>
+        <button onclick="verUpgrade()" style="width:100%;padding:12px;background:#1e1a16;color:#f5e6c8;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Mejorar mi plan →</button>
+      </div>
+    </div>
+
     <div class="src-grid" id="src-grid">
       <div class="src-btn" id="open-cam">
         <div class="src-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
@@ -419,10 +429,17 @@ async function loadSalon(){
       dotsEl.appendChild(d);
     }
 
-    // Bloquear si trial agotado
-    if (salon.plan === 'trial' && usadas >= limite) {
-      document.getElementById('limit-banner').style.display = 'block';
-      document.getElementById('src-grid').style.display = 'none';
+    // Bloquear si ha agotado generaciones (trial o plan de pago)
+    if (usadas >= limite) {
+      if (salon.plan === 'trial') {
+        // Trial agotado - mostrar planes de pago
+        document.getElementById('limit-banner').style.display = 'block';
+        document.getElementById('src-grid').style.display = 'none';
+      } else {
+        // Plan de pago agotado - mostrar mensaje de renovación
+        document.getElementById('limit-banner-pago').style.display = 'block';
+        document.getElementById('src-grid').style.display = 'none';
+      }
     }
   } catch(e) {}
 }
@@ -588,7 +605,12 @@ loadSalon();
 
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get('pago') === 'ok'){
-  setTimeout(()=>{ alert('¡Suscripción activada! Ya tienes generaciones ilimitadas.'); window.history.replaceState({}, '', window.location.pathname); loadSalon(); }, 500);
+  setTimeout(()=>{ alert('¡Plan activado! Ya puedes seguir generando peinados.'); window.history.replaceState({}, '', window.location.pathname); loadSalon(); }, 500);
+}
+
+function verUpgrade(){
+  document.getElementById('limit-banner-pago').style.display = 'none';
+  document.getElementById('limit-banner').style.display = 'block';
 }
 
 async function elegirPlan(plan){
