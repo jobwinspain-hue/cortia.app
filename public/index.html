@@ -268,6 +268,10 @@ canvas { display: none; }
       <button class="gen-btn" data-g="mujer">✦ Mujer</button>
       <button class="gen-btn" data-g="neutro">◈ Neutro</button>
     </div>
+    <div id="beard-section" style="display:none;">
+      <p class="sec-lbl">Estilo de barba</p>
+      <div class="sty-grid" id="beard-grid"></div>
+    </div>
     <p class="sec-lbl">Estilo de corte</p>
     <div class="sty-grid" id="sty-grid"></div>
     <div id="color-section" style="display:none;">
@@ -332,6 +336,13 @@ const STYLES = {
     {id:'long',name:'Melena larga',sub:'Largo',e:'🦁',fal:'long_hair'},
     {id:'dreadlocks',name:'Dreadlocks',sub:'Libre',e:'🌿',fal:'dreadlocks'},
     {id:'bun_m',name:'Moño man',sub:'Recogido',e:'🧢',fal:'bun'},
+    {id:'french_crop',name:'French Crop',sub:'Tendencia',e:'🗼',fal:'short_hair'},
+    {id:'caesar',name:'Caesar',sub:'Romano',e:'🏛️',fal:'short_hair'},
+    {id:'ivy_league',name:'Ivy League',sub:'Académico',e:'📚',fal:'side_part'},
+    {id:'taper',name:'Taper',sub:'Clásico moderno',e:'💇',fal:'short_hair'},
+    {id:'waves',name:'Waves',sub:'360 waves',e:'🌊',fal:'wavy_hair'},
+    {id:'afro_m',name:'Afro',sub:'Natural',e:'🌟',fal:'afro'},
+    {id:'cornrows',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
   ],
   mujer:[
     {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
@@ -366,6 +377,19 @@ const STYLES = {
   ]
 };
 
+const BEARDS = [
+  {id:'no_beard',name:'Sin barba',sub:'Afeitado',e:'😊',fal:'clean_shaven'},
+  {id:'stubble',name:'Barba de 3 días',sub:'Descuidado chic',e:'🧔',fal:'stubble_beard'},
+  {id:'short_beard',name:'Barba corta',sub:'Cuidada',e:'🧔‍♂️',fal:'short_beard'},
+  {id:'medium_beard',name:'Barba media',sub:'Clásica',e:'🧓',fal:'medium_beard'},
+  {id:'full_beard',name:'Barba completa',sub:'Vikingo',e:'🪓',fal:'full_beard'},
+  {id:'goatee',name:'Perilla',sub:'Perilla',e:'🎭',fal:'goatee'},
+  {id:'circle_beard',name:'Barba circular',sub:'Redondeada',e:'⭕',fal:'circle_beard'},
+  {id:'chinstrap',name:'Patillas unidas',sub:'Definida',e:'🎸',fal:'chinstrap_beard'},
+  {id:'van_dyke',name:'Van Dyke',sub:'Artística',e:'🎨',fal:'van_dyke_beard'},
+  {id:'balbo',name:'Balbo',sub:'Sin patillas',e:'🦁',fal:'balbo_beard'},
+];
+
 const HAIR_COLORS = [
   {id:'natural',name:'Natural',color:'#8B6914',fal:'natural'},
   {id:'black',name:'Negro',color:'#1a1a1a',fal:'black'},
@@ -387,7 +411,7 @@ const HAIR_COLORS = [
   {id:'rainbow',name:'Arcoíris',color:'linear-gradient(90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6)',fal:'rainbow'},
 ];
 
-let photo=null, style=null, hairColor='natural', gender='hombre', stream=null, facing='user';
+let photo=null, style=null, hairColor='natural', beard='no_beard', gender='hombre', stream=null, facing='user';
 let salon=null;
 
 // Cargar datos del salón según URL
@@ -457,10 +481,11 @@ function renderStyles(){
   STYLES[gender].forEach(s=>{
     const c=document.createElement('div'); c.className='sty-card'+(style===s.id?' sel':'');
     c.innerHTML=`<span class="sty-e">${s.e}</span><span class="sty-n">${s.name}</span><span class="sty-s">${s.sub}</span>`;
-    c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
+    c.onclick=()=>{ style=s.id; document.querySelectorAll('#sty-grid .sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
     g.appendChild(c);
   });
   document.getElementById('color-section').style.display=(gender==='mujer'||gender==='neutro')?'block':'none';
+  document.getElementById('beard-section').style.display=(gender==='hombre'||gender==='neutro')?'block':'none';
 }
 
 function renderColors(){
@@ -471,6 +496,16 @@ function renderColors(){
     el.innerHTML=`<div class="color-swatch" style="${swatchStyle}"></div><span class="color-name">${c.name}</span>`;
     el.onclick=()=>{ hairColor=c.id; document.querySelectorAll('.color-card').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); };
     g.appendChild(el);
+  });
+}
+
+function renderBeards(){
+  const g=document.getElementById('beard-grid'); g.innerHTML='';
+  BEARDS.forEach(b=>{
+    const c=document.createElement('div'); c.className='sty-card'+(beard===b.id?' sel':'');
+    c.innerHTML=`<span class="sty-e">${b.e}</span><span class="sty-n">${b.name}</span><span class="sty-s">${b.sub}</span>`;
+    c.onclick=()=>{ beard=b.id; document.querySelectorAll('#beard-grid .sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
+    g.appendChild(c);
   });
 }
 
@@ -552,7 +587,7 @@ document.getElementById('gen-btn').onclick=async()=>{
     const res=await fetch('/api/generate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, hairColor:falColor, styleLabel:label, genero:gender, salonId:salon?.id||null})
+      body:JSON.stringify({imageBase64:b64, hairstyle:falStyle, hairColor:falColor, styleLabel:label, genero:gender, salonId:salon?.id||null, beard:BEARDS.find(b=>b.id===beard)?.fal||'clean_shaven'})
     });
     const data=await res.json();
 
@@ -600,7 +635,7 @@ document.getElementById('newphoto-btn').onclick=()=>{
   setScreen('cam');
 };
 
-renderStyles(); renderColors();
+renderStyles(); renderColors(); renderBeards();
 loadSalon();
 
 const urlParams = new URLSearchParams(window.location.search);
