@@ -222,10 +222,6 @@ canvas { display: none; }
         </div>
       </div>
     </div>
-    <div id="cancel-sub-btn" style="display:none;text-align:center;margin-top:4px;">
-      <button onclick="gestionarSuscripcion()" style="background:transparent;border:none;color:#a09a90;font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;">Gestionar suscripción</button>
-    </div>
-
     <div id="limit-banner-pago" style="display:none;background:#f0f8ff;border:1.5px solid #b8d4e8;border-radius:16px;padding:20px;text-align:center;">
       <div style="font-size:28px;margin-bottom:8px;">🗓️</div>
       <h3 style="font-size:16px;font-weight:700;color:#1e1a16;margin-bottom:6px;">Has agotado tus generaciones este mes</h3>
@@ -449,16 +445,6 @@ async function loadSalon(){
       dotsEl.appendChild(d);
     }
 
-    // Mostrar botón gestionar suscripción para planes de pago
-    const cancelBtn = document.getElementById('cancel-sub-btn');
-    if (cancelBtn) {
-      if (salon.plan !== 'trial' && salon.stripe_subscription_id) {
-        cancelBtn.style.display = 'block';
-      } else {
-        cancelBtn.style.display = 'none';
-      }
-    }
-
     // Bloquear si ha agotado generaciones (trial o plan de pago)
     if (usadas >= limite) {
       if (salon.plan === 'trial') {
@@ -641,51 +627,6 @@ if(urlParams.get('pago') === 'ok'){
 function verUpgrade(){
   document.getElementById('limit-banner-pago').style.display = 'none';
   document.getElementById('limit-banner').style.display = 'block';
-}
-
-async function gestionarSuscripcion(){
-  const opciones = confirm(
-    '¿Qué quieres hacer con tu suscripción?
-
-' +
-    'Pulsa ACEPTAR para cancelar al final del período actual.
-' +
-    'Tus generaciones seguirán activas hasta fin de mes.
-
-' +
-    'Pulsa CANCELAR para mantener tu suscripción.'
-  );
-  if (!opciones) return;
-
-  const confirmar = confirm(
-    '¿Confirmas la cancelación?
-
-' +
-    'Seguirás teniendo acceso hasta el fin del período actual.
-' +
-    'El próximo mes volverás al plan gratuito con 5 generaciones.'
-  );
-  if (!confirmar) return;
-
-  try {
-    const r = await fetch('/api/cancelar', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ salonId: salon.id })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      alert('✅ Suscripción cancelada correctamente.
-
-Seguirás teniendo acceso hasta el ' + data.fechaFin + '.
-Gracias por haber usado CortIA.');
-      loadSalon();
-    } else {
-      throw new Error(data.error);
-    }
-  } catch(e) {
-    alert('Error: ' + e.message);
-  }
 }
 
 async function elegirPlan(plan){
