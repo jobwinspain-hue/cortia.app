@@ -232,6 +232,9 @@ canvas { display: none; }
       </div>
     </div>
 
+    <div id="cancel-wrap" style="display:none;text-align:right;margin-top:-4px;margin-bottom:4px;">
+      <button onclick="gestionarSuscripcion()" style="background:transparent;border:none;color:#a09a90;font-size:11px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;">Gestionar suscripción</button>
+    </div>
     <div class="src-grid" id="src-grid">
       <div class="src-btn" id="open-cam">
         <div class="src-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
@@ -445,6 +448,10 @@ async function loadSalon(){
       dotsEl.appendChild(d);
     }
 
+    // Mostrar botón cancelar solo para planes de pago
+    const cw = document.getElementById('cancel-wrap');
+    if (cw) cw.style.display = (salon.plan !== 'trial' && salon.stripe_subscription_id) ? 'block' : 'none';
+
     // Bloquear si ha agotado generaciones (trial o plan de pago)
     if (usadas >= limite) {
       if (salon.plan === 'trial') {
@@ -627,6 +634,22 @@ if(urlParams.get('pago') === 'ok'){
 function verUpgrade(){
   document.getElementById('limit-banner-pago').style.display = 'none';
   document.getElementById('limit-banner').style.display = 'block';
+}
+
+async function gestionarSuscripcion(){
+  if(!confirm('¿Quieres cancelar tu suscripción?
+
+Seguirás teniendo acceso hasta el fin del período actual pagado.
+El mes siguiente volverás al plan gratuito.
+
+Pulsa ACEPTAR para confirmar la cancelación.')) return;
+  try{
+    const r=await fetch('/api/cancelar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({salonId:salon.id})});
+    const data=await r.json();
+    if(data.ok) alert('✅ Suscripción cancelada. Seguirás con acceso hasta el '+data.fechaFin+'.
+Gracias por usar CortIA.');
+    else throw new Error(data.error);
+  }catch(e){ alert('Error: '+e.message); }
 }
 
 async function elegirPlan(plan){
