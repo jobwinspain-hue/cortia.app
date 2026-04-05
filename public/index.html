@@ -332,6 +332,15 @@ const STYLES = {
     {id:'long',name:'Melena larga',sub:'Largo',e:'🦁',fal:'long_hair'},
     {id:'dreadlocks',name:'Dreadlocks',sub:'Libre',e:'🌿',fal:'dreadlocks'},
     {id:'bun_m',name:'Moño man',sub:'Recogido',e:'🧢',fal:'bun'},
+    {id:'french_crop',name:'French Crop',sub:'Tendencia',e:'🗼',fal:'short_hair'},
+    {id:'caesar',name:'Caesar',sub:'Romano',e:'🏛️',fal:'short_hair'},
+    {id:'ivy_league',name:'Ivy League',sub:'Académico',e:'📚',fal:'side_part'},
+    {id:'taper',name:'Taper',sub:'Clásico moderno',e:'💇',fal:'short_hair'},
+    {id:'waves',name:'Waves',sub:'360 waves',e:'🌀',fal:'wavy_hair'},
+    {id:'afro_m',name:'Afro',sub:'Natural',e:'🌟',fal:'afro'},
+    {id:'cornrows',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
+    {id:'bowl',name:'Bowl Cut',sub:'Retro',e:'🥣',fal:'short_hair'},
+    {id:'edgar',name:'Edgar Cut',sub:'Urbano',e:'🔲',fal:'short_hair'},
   ],
   mujer:[
     {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
@@ -349,6 +358,13 @@ const STYLES = {
     {id:'shag',name:'Shag',sub:'Retro',e:'🎸',fal:'wavy_hair'},
     {id:'long_w',name:'Melena larga',sub:'Clásico',e:'🦋',fal:'long_hair'},
     {id:'afro_w',name:'Afro',sub:'Natural',e:'🌟',fal:'afro'},
+    {id:'french_bob',name:'French Bob',sub:'Parisino',e:'🗼',fal:'bob_cut'},
+    {id:'bixie',name:'Bixie',sub:'Bob+Pixie',e:'⚡',fal:'pixie_cut'},
+    {id:'octopus',name:'Octopus',sub:'Capas largas',e:'🐙',fal:'wavy_hair'},
+    {id:'butterfly',name:'Butterfly Cut',sub:'Ligero',e:'🦋',fal:'medium_long_hair'},
+    {id:'blowout',name:'Blowout',sub:'Con volumen',e:'💨',fal:'straight_hair'},
+    {id:'cornrows_w',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
+    {id:'space_buns',name:'Space Buns',sub:'Dos moños',e:'🌙',fal:'bun'},
   ],
   neutro:[
     {id:'buzz_n',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
@@ -460,7 +476,7 @@ function renderStyles(){
     c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
     g.appendChild(c);
   });
-  document.getElementById('color-section').style.display=(gender==='mujer'||gender==='neutro')?'block':'none';
+  document.getElementById('color-section').style.display='block';
 }
 
 function renderColors(){
