@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
   try {
-    const { imageBase64, hairstyle, hairColor, styleLabel, genero, salonId } = req.body;
+    const { imageBase64, hairstyle, hairColor, styleLabel, genero, salonId, beard } = req.body;
     if (!imageBase64 || !hairstyle) return res.status(400).json({ error: 'Faltan parámetros' });
 
     // Verificar límite del salón
@@ -24,8 +24,8 @@ export default async function handler(req, res) {
         const salon = sdata[0];
         const mesActual = new Date().toISOString().slice(0, 7);
         const genMes = salon.mes_actual !== mesActual ? 0 : salon.generaciones_mes;
-        if (salon.plan === 'trial' && genMes >= salon.generaciones_limite) {
-          return res.status(402).json({ error: 'LIMITE_ALCANZADO', mensaje: `Has usado las ${salon.generaciones_limite} generaciones gratuitas. Contacta con nosotros para continuar.` });
+        if (genMes >= salon.generaciones_limite) {
+          return res.status(402).json({ error: 'LIMITE_ALCANZADO', plan: salon.plan, mensaje: salon.plan === 'trial' ? `Has usado las ${salon.generaciones_limite} generaciones gratuitas.` : `Has agotado tus ${salon.generaciones_limite} generaciones de este mes. Se renuevan el día 1.` });
         }
       }
     }
@@ -107,10 +107,9 @@ export default async function handler(req, res) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514', max_tokens: 500,
+            model: 'claude-haiku-4-5-20251001', max_tokens: 200,
             messages: [{ role: 'user', content: [
-              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-              { type: 'text', text: `Eres estilista profesional. Analiza esta foto y da consejos sobre el estilo "${styleLabel}"${falColor !== 'natural' ? ` con color ${falColor}` : ''}. Responde SOLO JSON:\n{"instrucciones":"frase para el peluquero","tips":["tip1","tip2","tip3"],"compatibilidad":8}` }
+              { type: 'text', text: `Eres estilista. Estilo: "${styleLabel}"${falColor !== 'natural' ? `, color: ${falColor}` : ''}. Responde SOLO JSON sin explicaciones: {"instrucciones":"frase corta para el peluquero max 15 palabras","tips":["tip1","tip2","tip3"]}` }
             ]}]
           })
         });
