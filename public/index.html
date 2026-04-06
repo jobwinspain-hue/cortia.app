@@ -333,7 +333,7 @@ canvas { display: none; }
         <p style="margin-bottom:12px;"><strong style="color:#1e1a16;">📧 Datos de contacto</strong><br>Si solicitas una demo, tus datos (nombre, email, teléfono) se guardan exclusivamente para contactarte y activar tu cuenta. No se ceden a terceros.</p>
         <p style="margin-bottom:12px;"><strong style="color:#1e1a16;">🍪 Cookies</strong><br>Esta aplicación no utiliza cookies de seguimiento ni publicidad. Solo las estrictamente necesarias para el funcionamiento.</p>
         <p style="margin-bottom:12px;"><strong style="color:#1e1a16;">🔒 Seguridad</strong><br>Toda la comunicación está cifrada mediante HTTPS. Cumplimos con el Reglamento General de Protección de Datos (RGPD).</p>
-        <p><strong style="color:#1e1a16;">📬 Contacto</strong><br>Para cualquier consulta sobre privacidad: <span style="color:#b8965a;">jobwinspain@gmail.com</span></p>
+        <p><strong style="color:#1e1a16;">📬 Contacto</strong><br>Para cualquier consulta sobre privacidad: <span style="color:#b8965a;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="412b2e2336282f323120282f01262c20282d6f222e2c">[email&#160;protected]</a></span></p>
       </div>
       <button onclick="document.getElementById('privacy-modal').style.display='none'" style="width:100%;margin-top:20px;padding:12px;background:#1e1a16;color:#f5e6c8;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Entendido</button>
     </div>
@@ -342,7 +342,7 @@ canvas { display: none; }
   <footer class="app-footer">© 2025 <span>JobWin</span> · CortIA · Todos los derechos reservados</footer>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const STYLES = {
   hombre:[
     {id:'undercut',name:'Undercut',sub:'Moderno',e:'💈',fal:'short_hair'},
@@ -369,6 +369,9 @@ const STYLES = {
     {id:'cornrows',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
     {id:'bowl',name:'Bowl Cut',sub:'Retro',e:'🥣',fal:'short_hair'},
     {id:'edgar',name:'Edgar Cut',sub:'Urbano',e:'🔲',fal:'short_hair'},
+    {id:'rapado',name:'Rapado',sub:'Al cero',e:'⚡',fal:'buzz_cut'},
+    {id:'rapado_dis',name:'Rapado diseño',sub:'Con patron',e:'✂️',fal:'buzz_cut'},
+    {id:'calvo',name:'Cabeza rapada',sub:'Sin pelo',e:'💡',fal:'buzz_cut'},
   ],
   mujer:[
     {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
@@ -393,6 +396,12 @@ const STYLES = {
     {id:'blowout',name:'Blowout',sub:'Con volumen',e:'💨',fal:'straight_hair'},
     {id:'cornrows_w',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
     {id:'space_buns',name:'Space Buns',sub:'Dos moños',e:'🌙',fal:'bun'},
+    {id:'melena_flequillo',name:'Melena flequillo',sub:'Largo con fleco',e:'🌺',fal:'bangs'},
+    {id:'recogido_bajo',name:'Recogido bajo',sub:'Elegante',e:'👑',fal:'bun'},
+    {id:'halfup',name:'Half-up',sub:'Mitad recogido',e:'🎧',fal:'bun'},
+    {id:'trenza_fr',name:'Trenza francesa',sub:'Clasica',e:'🧶',fal:'braids'},
+    {id:'beach_waves',name:'Beach Waves',sub:'Ondas naturales',e:'🌊',fal:'wavy_hair'},
+    {id:'rapada_w',name:'Rapada',sub:'Atrevida',e:'⭐',fal:'buzz_cut'},
   ],
   neutro:[
     {id:'buzz_n',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
@@ -684,13 +693,4 @@ async function elegirPlan(plan){
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ salonId: salon.id, salonSlug: salon.slug, salonNombre: salon.nombre, plan: plan })
     });
-    const data = await r.json();
-    if(data.url){ window.location.href = data.url; }
-    else { throw new Error(data.error || 'Error creando sesión de pago'); }
-  }catch(e){
-    alert('Error: ' + e.message);
-  }
-}
-</script>
-</body>
-</html>
+    const
