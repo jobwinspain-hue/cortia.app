@@ -709,14 +709,33 @@ async function elegirPlan(plan){
     const r=await fetch('/api/sugerir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageBase64:b64,gender:gender})});
     const data=await r.json();
     if(!data.ok)throw new Error(data.error||'Error');
-    document.getElementById('suggest-cards').innerHTML=data.sugerencias.map(function(s){return '<div onclick="elegirSugerencia(\''+s.id+'\')" style="background:white;border:1.5px solid #e2dfd9;border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;"><span style="font-size:22px;">'+s.emoji+'</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1e1a16;">'+s.nombre+'</div><div style="font-size:11px;color:#4a9b8e;font-weight:600;margin-top:2px;">'+s.colorNombre+'</div><div style="font-size:12px;color:#7a7268;margin-top:2px;">'+s.razon+'</div></div></div>';}).join('');
+    document.getElementById('suggest-cards').innerHTML=data.sugerencias.map(function(s){return '<div onclick="elegirSugerencia(\''+s.id+'\',\''+s.color+'\')" style="background:white;border:1.5px solid #e2dfd9;border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;"><span style="font-size:22px;">'+s.emoji+'</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1e1a16;">'+s.nombre+'</div><div style="font-size:11px;color:#4a9b8e;font-weight:600;margin-top:2px;">'+s.colorNombre+'</div><div style="font-size:12px;color:#7a7268;margin-top:2px;">'+s.razon+'</div></div></div>';}).join('');
     document.getElementById('suggest-result').style.display='block';
   }catch(e){alert('Error: '+e.message);}
   btn.textContent='Sugiéreme un estilo con IA';btn.disabled=false;
 }
-function elegirSugerencia(styleId){
-  style=styleId;setScreen('style');renderStyles();renderColors();
-  setTimeout(function(){document.querySelectorAll('.sty-card').forEach(function(c){var s=STYLES[gender].find(function(x){return x.id===styleId;});if(s&&c.querySelector('.sty-n')&&c.querySelector('.sty-n').textContent===s.name){c.classList.add('sel');c.scrollIntoView({behavior:'smooth',block:'center'});}});},150);
+function elegirSugerencia(styleId, colorId){
+  style=styleId;
+  if(colorId && colorId !== 'natural') hairColor=colorId;
+  setScreen('style');renderStyles();renderColors();
+  setTimeout(function(){
+    document.querySelectorAll('.sty-card').forEach(function(c){
+      var s=STYLES[gender].find(function(x){return x.id===styleId;});
+      if(s&&c.querySelector('.sty-n')&&c.querySelector('.sty-n').textContent===s.name){
+        c.classList.add('sel');c.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+    document.querySelectorAll('.color-card').forEach(function(c){
+      var col=HAIR_COLORS.find(function(x){return x.id===colorId;});
+      if(col&&c.querySelector('.color-name')&&c.querySelector('.color-name').textContent===col.name){
+        c.classList.add('sel');
+      }
+    });
+    if(colorId && colorId !== 'natural'){
+      var acc=document.querySelector('.color-accordion');
+      if(acc) acc.setAttribute('open','');
+    }
+  },150);
 }
 </script>
 </body>
