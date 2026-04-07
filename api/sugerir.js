@@ -13,6 +13,14 @@ export default async function handler(req, res) {
     neutro: ['buzz_n','textured_n','pixie_n','mohawk_n','wolf_n','braids_n','bob_n','afro_n','dread_n','shag_n','long_n','ponytail_n']
   };
 
+  const coloresValidos = ['natural','black','dark_brown','light_brown','blonde','platinum','red','auburn','gray','silver','blue','purple','pink','green','highlights','balayage','ombre'];
+
+  const nombresColor = {
+    natural:'Natural',black:'Negro',dark_brown:'Castaño oscuro',light_brown:'Castaño claro',
+    blonde:'Rubio',platinum:'Platino',red:'Rojo',auburn:'Cobrizo',gray:'Gris',silver:'Plateado',
+    blue:'Azul',purple:'Morado',pink:'Rosa',green:'Verde',highlights:'Mechas',balayage:'Balayage',ombre:'Ombré'
+  };
+
   const emojis = {
     undercut:'💈',fade:'✂️',pompadour:'🎸',buzz:'⚡',quiff:'🌊',slickback:'🎩',curtains:'🪄',textured:'🍃',mullet:'🔥',mohawk:'🤘',sidepart:'🕴️',fringe:'🫧',long:'🦁',dreadlocks:'🌿',bun_m:'🧢',french_crop:'🗼',caesar:'🏛️',ivy_league:'📚',taper:'💇',waves:'🌀',afro_m:'🌟',cornrows:'🌾',bowl:'🥣',edgar:'🔲',rapado:'⚡',
     bob:'💎',lob:'🌸',pixie:'⭐',layers:'🌊',bangs:'✨',wolf:'🐺',curtainbangs:'🌺',bun:'👑',straight:'💫',curly:'🌀',ponytail:'🎀',braids:'🧶',shag:'🎸',long_w:'🦋',afro_w:'🌟',french_bob:'🗼',bixie:'⚡',octopus:'🐙',butterfly:'🦋',blowout:'💨',melena_flequillo:'🌺',recogido_bajo:'👑',trenza_fr:'🧶',beach_waves:'🌊',rapada_w:'⭐',
@@ -32,8 +40,9 @@ export default async function handler(req, res) {
     const generoTexto = gender === 'mujer' ? 'mujer' : gender === 'neutro' ? 'persona' : 'hombre';
     const validIds = estilosDisponibles[gender] || estilosDisponibles.hombre;
     const estilosList = validIds.join(', ');
+    const coloresList = coloresValidos.join(', ');
 
-    const prompt = `Eres un estilista experto. Analiza esta foto de una persona ${generoTexto}: forma del rostro, textura del pelo y rasgos faciales. Elige 3 estilos de esta lista que mejor le favorecerían: ${estilosList}. Responde SOLO con JSON valido sin texto adicional: {"sugerencias":[{"id":"id_de_lista","razon":"razon en max 10 palabras"},{"id":"id_de_lista","razon":"razon"},{"id":"id_de_lista","razon":"razon"}]}`;
+    const prompt = `Eres un estilista experto. Analiza esta foto de una persona ${generoTexto}: forma del rostro, textura del pelo, tono de piel y rasgos faciales. Elige 3 combinaciones de estilo y color que mejor le favorecerían. Estilos disponibles: ${estilosList}. Colores disponibles: ${coloresList}. Responde SOLO con JSON valido sin texto adicional: {"sugerencias":[{"id":"id_estilo","color":"id_color","razon":"razon en max 10 palabras"},{"id":"id_estilo","color":"id_color","razon":"razon"},{"id":"id_estilo","color":"id_color","razon":"razon"}]}`;
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -64,10 +73,7 @@ export default async function handler(req, res) {
     const cd = await r.json();
     const partial = cd.content?.find(c => c.type === 'text')?.text || '';
 
-    // Reconstruct full JSON from prefill + completion
     let fullJson = '{"sugerencias":[' + partial;
-
-    // Ensure it's properly closed
     if (!fullJson.includes(']}')) {
       fullJson = fullJson.replace(/,?\s*$/, ']}');
     }
@@ -77,32 +83,30 @@ export default async function handler(req, res) {
       const parsed = JSON.parse(fullJson);
       rawSugerencias = parsed.sugerencias || [];
     } catch(e) {
-      // Try to extract individual objects
-      const matches = fullJson.match(/\{"id":"([^"]+)","razon":"([^"]+)"\}/g) ||
-                      fullJson.match(/\{"id":"([^"]+)"[^}]*"razon":"([^"]+)"[^}]*\}/g) || [];
-      rawSugerencias = matches.map(m => {
-        const id = m.match(/"id":"([^"]+)"/)?.[1];
-        const razon = m.match(/"razon":"([^"]+)"/)?.[1];
-        return { id, razon };
-      });
+      const matches = fullJson.match(/\{"id":"([^"]+)"[^}]*\}/g) || [];
+      rawSugerencias = matches.map(m => ({
+        id: m.match(/"id":"([^"]+)"/)?.[1],
+        color: m.match(/"color":"([^"]+)"/)?.[1],
+        razon: m.match(/"razon":"([^"]+)"/)?.[1]
+      }));
     }
 
-    // Validar IDs
     const sugerencias = rawSugerencias
       .filter(s => s.id && validIds.includes(s.id))
       .slice(0, 3)
       .map(s => ({
         id: s.id,
+        color: coloresValidos.includes(s.color) ? s.color : 'natural',
+        colorNombre: nombresColor[s.color] || 'Natural',
         razon: s.razon || 'Favorece tus rasgos',
         emoji: emojis[s.id] || '✂️',
         nombre: nombres[s.id] || s.id
       }));
 
-    // Fallback si faltan
     if (sugerencias.length < 3) {
       const usados = sugerencias.map(s => s.id);
       validIds.filter(id => !usados.includes(id)).slice(0, 3 - sugerencias.length).forEach(id => {
-        sugerencias.push({ id, razon: 'Estilo muy favorecedor', emoji: emojis[id] || '✂️', nombre: nombres[id] || id });
+        sugerencias.push({ id, color: 'natural', colorNombre: 'Natural', razon: 'Estilo muy favorecedor', emoji: emojis[id] || '✂️', nombre: nombres[id] || id });
       });
     }
 
