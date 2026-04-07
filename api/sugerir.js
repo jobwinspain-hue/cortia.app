@@ -78,4 +78,4 @@ IMPORTANTE: Los ids deben ser exactamente de la lista disponible.`;
   } catch(e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
-}
+} 
