@@ -30,7 +30,18 @@ export default async function handler(req, res) {
     if (!imageBase64) return res.status(400).json({ ok: false, error: 'Falta imagen' });
 
     const generoTexto = gender === 'mujer' ? 'mujer' : gender === 'neutro' ? 'persona' : 'hombre';
-    const estilosList = (estilosDisponibles[gender] || estilosDisponibles.hombre).join(', ');
+    const validIds = estilosDisponibles[gender] || estilosDisponibles.hombre;
+    const estilosList = validIds.join(', ');
+
+    const prompt = `Eres un estilista experto. Analiza cuidadosamente esta foto de una persona ${generoTexto}:
+- Forma del rostro (ovalado, redondo, cuadrado, alargado, etc)
+- Textura y grosor del pelo actual
+- Rasgos faciales destacados
+
+Basándote EXCLUSIVAMENTE en estos rasgos físicos, elige 3 estilos de esta lista que mejor le favorecerían: ${estilosList}
+
+Responde SOLO con JSON válido, sin texto adicional:
+{"sugerencias":[{"id":"id_exacto_de_lista","razon":"razon especifica basada en sus rasgos en max 10 palabras"},{"id":"id_exacto_de_lista","razon":"razon especifica"},{"id":"id_exacto_de_lista","razon":"razon especifica"}]}`;
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -41,64 +52,44 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-              { type: 'text', text: `Analiza la foto de este ${generoTexto}. Elige exactamente 3 ids de esta lista: ${estilosList}. Responde solo JSON:` }
-            ]
-          },
-          {
-            role: 'assistant',
-            content: '{"sugerencias":['
-          }
-        ]
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
       })
     });
 
     const cd = await r.json();
-    const partial = cd.content?.find(c => c.type === 'text')?.text || '';
-    const fullJson = '{"sugerencias":[' + partial;
+    const text = cd.content?.find(c => c.type === 'text')?.text || '';
 
-    let rawSugerencias = [];
-    try {
-      const parsed = JSON.parse(fullJson);
-      rawSugerencias = parsed.sugerencias || [];
-    } catch(e) {
-      const match = fullJson.match(/\{[^{}]*"id"\s*:\s*"([^"]+)"[^{}]*"razon"\s*:\s*"([^"]+)"[^{}]*\}/g);
-      if (match) {
-        rawSugerencias = match.map(m => {
-          const id = m.match(/"id"\s*:\s*"([^"]+)"/)?.[1];
-          const razon = m.match(/"razon"\s*:\s*"([^"]+)"/)?.[1];
-          return { id, razon };
-        });
-      }
-    }
+    // Extract JSON
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Sin JSON en respuesta');
 
-    // Filtrar solo IDs válidos
-    const validIds = estilosDisponibles[gender] || estilosDisponibles.hombre;
+    const parsed = JSON.parse(jsonMatch[0]);
+    let rawSugerencias = parsed.sugerencias || [];
+
+    // Validar IDs
     const sugerencias = rawSugerencias
       .filter(s => s.id && validIds.includes(s.id))
       .slice(0, 3)
       .map(s => ({
         id: s.id,
-        razon: s.razon || 'Estilo que favorece tus rasgos',
+        razon: s.razon || 'Favorece tus rasgos faciales',
         emoji: emojis[s.id] || '✂️',
         nombre: nombres[s.id] || s.id
       }));
 
-    // Si no hay suficientes válidos, completar con fallbacks
+    // Fallback si faltan
     if (sugerencias.length < 3) {
       const usados = sugerencias.map(s => s.id);
-      const fallbacks = validIds.filter(id => !usados.includes(id)).slice(0, 3 - sugerencias.length);
-      fallbacks.forEach(id => sugerencias.push({
-        id,
-        razon: 'Estilo popular que favorece a muchos rostros',
-        emoji: emojis[id] || '✂️',
-        nombre: nombres[id] || id
-      }));
+      validIds.filter(id => !usados.includes(id)).slice(0, 3 - sugerencias.length).forEach(id => {
+        sugerencias.push({ id, razon: 'Estilo popular muy favorecedor', emoji: emojis[id] || '✂️', nombre: nombres[id] || id });
+      });
     }
 
     return res.status(200).json({ ok: true, sugerencias });
