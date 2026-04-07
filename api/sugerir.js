@@ -33,15 +33,7 @@ export default async function handler(req, res) {
     const validIds = estilosDisponibles[gender] || estilosDisponibles.hombre;
     const estilosList = validIds.join(', ');
 
-    const prompt = `Eres un estilista experto. Analiza cuidadosamente esta foto de una persona ${generoTexto}:
-- Forma del rostro (ovalado, redondo, cuadrado, alargado, etc)
-- Textura y grosor del pelo actual
-- Rasgos faciales destacados
-
-Basándote EXCLUSIVAMENTE en estos rasgos físicos, elige 3 estilos de esta lista que mejor le favorecerían: ${estilosList}
-
-Responde SOLO con JSON válido, sin texto adicional:
-{"sugerencias":[{"id":"id_exacto_de_lista","razon":"razon especifica basada en sus rasgos en max 10 palabras"},{"id":"id_exacto_de_lista","razon":"razon especifica"},{"id":"id_exacto_de_lista","razon":"razon especifica"}]}`;
+    const prompt = `Eres un estilista experto. Analiza esta foto de una persona ${generoTexto}: forma del rostro, textura del pelo y rasgos faciales. Elige 3 estilos de esta lista que mejor le favorecerían: ${estilosList}. Responde SOLO con JSON valido sin texto adicional: {"sugerencias":[{"id":"id_de_lista","razon":"razon en max 10 palabras"},{"id":"id_de_lista","razon":"razon"},{"id":"id_de_lista","razon":"razon"}]}`;
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -53,25 +45,47 @@ Responde SOLO con JSON válido, sin texto adicional:
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 500,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+              { type: 'text', text: prompt }
+            ]
+          },
+          {
+            role: 'assistant',
+            content: '{"sugerencias":['
+          }
+        ]
       })
     });
 
     const cd = await r.json();
-    const text = cd.content?.find(c => c.type === 'text')?.text || '';
+    const partial = cd.content?.find(c => c.type === 'text')?.text || '';
 
-    // Extract JSON
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Sin JSON en respuesta');
+    // Reconstruct full JSON from prefill + completion
+    let fullJson = '{"sugerencias":[' + partial;
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    let rawSugerencias = parsed.sugerencias || [];
+    // Ensure it's properly closed
+    if (!fullJson.includes(']}')) {
+      fullJson = fullJson.replace(/,?\s*$/, ']}');
+    }
+
+    let rawSugerencias = [];
+    try {
+      const parsed = JSON.parse(fullJson);
+      rawSugerencias = parsed.sugerencias || [];
+    } catch(e) {
+      // Try to extract individual objects
+      const matches = fullJson.match(/\{"id":"([^"]+)","razon":"([^"]+)"\}/g) ||
+                      fullJson.match(/\{"id":"([^"]+)"[^}]*"razon":"([^"]+)"[^}]*\}/g) || [];
+      rawSugerencias = matches.map(m => {
+        const id = m.match(/"id":"([^"]+)"/)?.[1];
+        const razon = m.match(/"razon":"([^"]+)"/)?.[1];
+        return { id, razon };
+      });
+    }
 
     // Validar IDs
     const sugerencias = rawSugerencias
@@ -79,7 +93,7 @@ Responde SOLO con JSON válido, sin texto adicional:
       .slice(0, 3)
       .map(s => ({
         id: s.id,
-        razon: s.razon || 'Favorece tus rasgos faciales',
+        razon: s.razon || 'Favorece tus rasgos',
         emoji: emojis[s.id] || '✂️',
         nombre: nombres[s.id] || s.id
       }));
@@ -88,7 +102,7 @@ Responde SOLO con JSON válido, sin texto adicional:
     if (sugerencias.length < 3) {
       const usados = sugerencias.map(s => s.id);
       validIds.filter(id => !usados.includes(id)).slice(0, 3 - sugerencias.length).forEach(id => {
-        sugerencias.push({ id, razon: 'Estilo popular muy favorecedor', emoji: emojis[id] || '✂️', nombre: nombres[id] || id });
+        sugerencias.push({ id, razon: 'Estilo muy favorecedor', emoji: emojis[id] || '✂️', nombre: nombres[id] || id });
       });
     }
 
