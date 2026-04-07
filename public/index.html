@@ -716,6 +716,7 @@ async function elegirPlan(plan){
 }
 function elegirSugerencia(styleId, colorId){
   style=styleId;
+  document.getElementById('suggest-gen-btn').style.display='block';
   if(colorId && colorId !== 'natural') hairColor=colorId;
   setScreen('style');renderStyles();renderColors();
   setTimeout(function(){
