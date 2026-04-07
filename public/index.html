@@ -262,6 +262,8 @@ canvas { display: none; }
       <button class="btn btn-p" id="use-btn">Usar esta foto →</button>
     </div>
     <input type="file" id="file-in" accept="image/*">
+    <button id="suggest-btn" style="display:none;width:100%;padding:13px;background:linear-gradient(135deg,#4a9b8e,#3a8b7e);color:white;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;" onclick="sugerirEstilo()">Sugiéreme un estilo con IA</button>
+    <div id="suggest-result" style="display:none;background:#f0f8f6;border:1.5px solid #4a9b8e;border-radius:14px;padding:16px;margin-top:4px;"><div style="font-size:13px;font-weight:600;color:#3a8b7e;margin-bottom:10px;">Estilos recomendados para ti</div><div id="suggest-cards" style="display:flex;flex-direction:column;gap:8px;"></div><button onclick="document.getElementById('suggest-result').style.display='none';setScreen('style');renderStyles();renderColors();" style="width:100%;margin-top:12px;padding:10px;background:#1e1a16;color:#f5e6c8;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Ver todos los estilos</button></div>
   </div>
 
   <div id="s-style" class="screen">
@@ -537,6 +539,8 @@ function showConfirm(){
   document.getElementById('cam-ov').style.display='none';
   document.getElementById('prev').style.display='block';
   document.getElementById('photo-acts').style.display='flex';
+  document.getElementById('suggest-btn').style.display='block';
+  document.getElementById('suggest-result').style.display='none';
 }
 
 async function startCam(){
@@ -697,6 +701,23 @@ async function elegirPlan(plan){
   }catch(e){
     alert('Error: ' + e.message);
   }
+}
+  async function sugerirEstilo(){
+  const btn=document.getElementById('suggest-btn');
+  btn.textContent='Analizando tu foto...';btn.disabled=true;
+  try{
+    const b64=photo.split(',')[1];
+    const r=await fetch('/api/sugerir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageBase64:b64,gender:gender})});
+    const data=await r.json();
+    if(!data.ok)throw new Error(data.error||'Error');
+    document.getElementById('suggest-cards').innerHTML=data.sugerencias.map(s=>'<div onclick="elegirSugerencia(\''+s.id+'\')" style="background:white;border:1.5px solid #e2dfd9;border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;"><span style="font-size:22px;">'+s.emoji+'</span><div><div style="font-size:13px;font-weight:600;color:#1e1a16;">'+s.nombre+'</div><div style="font-size:12px;color:#7a7268;margin-top:2px;">'+s.razon+'</div></div></div>').join('');
+    document.getElementById('suggest-result').style.display='block';
+  }catch(e){alert('Error: '+e.message);}
+  btn.textContent='Sugiéreme un estilo con IA';btn.disabled=false;
+}
+function elegirSugerencia(styleId){
+  style=styleId;setScreen('style');renderStyles();renderColors();
+  setTimeout(function(){document.querySelectorAll('.sty-card').forEach(function(c){var s=STYLES[gender].find(function(x){return x.id===styleId;});if(s&&c.querySelector('.sty-n')&&c.querySelector('.sty-n').textContent===s.name){c.classList.add('sel');c.scrollIntoView({behavior:'smooth',block:'center'});}});},150);
 }
 </script>
 </body>
