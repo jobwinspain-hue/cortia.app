@@ -11,36 +11,34 @@ export default async function handler(req, res) {
     const { imageBase64, gender } = req.body;
     if (!imageBase64) return res.status(400).json({ ok: false, error: 'Falta imagen' });
 
-    const generoTexto = gender === 'mujer' ? 'mujer' : gender === 'neutro' ? 'persona de género neutro' : 'hombre';
+    const generoTexto = gender === 'mujer' ? 'mujer' : gender === 'neutro' ? 'persona' : 'hombre';
 
     const estilosDisponibles = {
-      hombre: ['undercut','fade','pompadour','buzz','quiff','slickback','curtains','textured','mullet','mohawk','sidepart','fringe','long','dreadlocks','bun_m','french_crop','caesar','ivy_league','taper','waves','afro_m','cornrows','bowl','edgar','rapado','rapado_dis','calvo'],
-      mujer: ['bob','lob','pixie','layers','bangs','wolf','curtainbangs','bun','straight','curly','ponytail','braids','shag','long_w','afro_w','french_bob','bixie','octopus','butterfly','blowout','melena_flequillo','recogido_bajo','trenza_fr','beach_waves','rapada_w','cornrows_w'],
+      hombre: ['undercut','fade','pompadour','buzz','quiff','slickback','curtains','textured','mullet','mohawk','sidepart','fringe','long','dreadlocks','bun_m','french_crop','caesar','ivy_league','taper','waves','afro_m','cornrows','bowl','edgar','rapado'],
+      mujer: ['bob','lob','pixie','layers','bangs','wolf','curtainbangs','bun','straight','curly','ponytail','braids','shag','long_w','afro_w','french_bob','bixie','octopus','butterfly','blowout','melena_flequillo','recogido_bajo','trenza_fr','beach_waves','rapada_w'],
       neutro: ['buzz_n','textured_n','pixie_n','mohawk_n','wolf_n','braids_n','bob_n','afro_n','dread_n','shag_n','long_n','ponytail_n']
     };
 
     const emojis = {
-      undercut:'💈',fade:'✂️',pompadour:'🎸',buzz:'⚡',quiff:'🌊',slickback:'🎩',curtains:'🪄',textured:'🍃',mullet:'🔥',mohawk:'🤘',sidepart:'🕴️',fringe:'🫧',long:'🦁',dreadlocks:'🌿',bun_m:'🧢',french_crop:'🗼',caesar:'🏛️',ivy_league:'📚',taper:'💇',waves:'🌀',afro_m:'🌟',cornrows:'🌾',bowl:'🥣',edgar:'🔲',rapado:'⚡',rapado_dis:'✂️',calvo:'💡',
-      bob:'💎',lob:'🌸',pixie:'⭐',layers:'🌊',bangs:'✨',wolf:'🐺',curtainbangs:'🌺',bun:'👑',straight:'💫',curly:'🌀',ponytail:'🎀',braids:'🧶',shag:'🎸',long_w:'🦋',afro_w:'🌟',french_bob:'🗼',bixie:'⚡',octopus:'🐙',butterfly:'🦋',blowout:'💨',melena_flequillo:'🌺',recogido_bajo:'👑',trenza_fr:'🧶',beach_waves:'🌊',rapada_w:'⭐',cornrows_w:'🌾',
+      undercut:'💈',fade:'✂️',pompadour:'🎸',buzz:'⚡',quiff:'🌊',slickback:'🎩',curtains:'🪄',textured:'🍃',mullet:'🔥',mohawk:'🤘',sidepart:'🕴️',fringe:'🫧',long:'🦁',dreadlocks:'🌿',bun_m:'🧢',french_crop:'🗼',caesar:'🏛️',ivy_league:'📚',taper:'💇',waves:'🌀',afro_m:'🌟',cornrows:'🌾',bowl:'🥣',edgar:'🔲',rapado:'⚡',
+      bob:'💎',lob:'🌸',pixie:'⭐',layers:'🌊',bangs:'✨',wolf:'🐺',curtainbangs:'🌺',bun:'👑',straight:'💫',curly:'🌀',ponytail:'🎀',braids:'🧶',shag:'🎸',long_w:'🦋',afro_w:'🌟',french_bob:'🗼',bixie:'⚡',octopus:'🐙',butterfly:'🦋',blowout:'💨',melena_flequillo:'🌺',recogido_bajo:'👑',trenza_fr:'🧶',beach_waves:'🌊',rapada_w:'⭐',
       buzz_n:'⚡',textured_n:'🍃',pixie_n:'⭐',mohawk_n:'🤘',wolf_n:'🐺',braids_n:'🧶',bob_n:'💎',afro_n:'🌟',dread_n:'🦁',shag_n:'🎸',long_n:'🌿',ponytail_n:'🎀'
     };
 
     const nombres = {
-      undercut:'Undercut',fade:'Fade',pompadour:'Pompadour',buzz:'Buzz Cut',quiff:'Quiff',slickback:'Slick Back',curtains:'Cortinillas',textured:'Texturizado',mullet:'Mullet',mohawk:'Mohawk',sidepart:'Raya lateral',fringe:'Flequillo',long:'Melena larga',dreadlocks:'Dreadlocks',bun_m:'Moño man',french_crop:'French Crop',caesar:'Caesar',ivy_league:'Ivy League',taper:'Taper',waves:'Waves',afro_m:'Afro',cornrows:'Cornrows',bowl:'Bowl Cut',edgar:'Edgar Cut',rapado:'Rapado',rapado_dis:'Rapado diseño',calvo:'Cabeza rapada',
-      bob:'Bob',lob:'Lob',pixie:'Pixie',layers:'Capas',bangs:'Flequillo recto',wolf:'Ondas y capas',curtainbangs:'Flequillo cortina',bun:'Moño alto',straight:'Liso',curly:'Rizado',ponytail:'Cola alta',braids:'Trenzas',shag:'Shag',long_w:'Melena larga',afro_w:'Afro',french_bob:'French Bob',bixie:'Bixie',octopus:'Octopus',butterfly:'Butterfly Cut',blowout:'Blowout',melena_flequillo:'Melena flequillo',recogido_bajo:'Recogido bajo',trenza_fr:'Trenza francesa',beach_waves:'Beach Waves',rapada_w:'Rapada',cornrows_w:'Cornrows',
+      undercut:'Undercut',fade:'Fade',pompadour:'Pompadour',buzz:'Buzz Cut',quiff:'Quiff',slickback:'Slick Back',curtains:'Cortinillas',textured:'Texturizado',mullet:'Mullet',mohawk:'Mohawk',sidepart:'Raya lateral',fringe:'Flequillo',long:'Melena larga',dreadlocks:'Dreadlocks',bun_m:'Moño man',french_crop:'French Crop',caesar:'Caesar',ivy_league:'Ivy League',taper:'Taper',waves:'Waves',afro_m:'Afro',cornrows:'Cornrows',bowl:'Bowl Cut',edgar:'Edgar Cut',rapado:'Rapado',
+      bob:'Bob',lob:'Lob',pixie:'Pixie',layers:'Capas',bangs:'Flequillo recto',wolf:'Ondas y capas',curtainbangs:'Flequillo cortina',bun:'Moño alto',straight:'Liso',curly:'Rizado',ponytail:'Cola alta',braids:'Trenzas',shag:'Shag',long_w:'Melena larga',afro_w:'Afro',french_bob:'French Bob',bixie:'Bixie',octopus:'Octopus',butterfly:'Butterfly Cut',blowout:'Blowout',melena_flequillo:'Melena flequillo',recogido_bajo:'Recogido bajo',trenza_fr:'Trenza francesa',beach_waves:'Beach Waves',rapada_w:'Rapada',
       buzz_n:'Buzz Cut',textured_n:'Texturizado',pixie_n:'Pixie',mohawk_n:'Mohawk',wolf_n:'Ondas y capas',braids_n:'Trenzas',bob_n:'Bob',afro_n:'Afro',dread_n:'Dreadlocks',shag_n:'Shag',long_n:'Pelo largo',ponytail_n:'Cola de caballo'
     };
 
     const estilosList = (estilosDisponibles[gender] || estilosDisponibles.hombre).join(', ');
 
-    const prompt = `Eres un estilista profesional experto. Analiza esta foto de una ${generoTexto} y recomienda exactamente 3 estilos de peinado que mejor le quedarían, teniendo en cuenta la forma de su cara, color de piel, color de ojos y tipo de pelo actual.
+    const prompt = `Eres estilista profesional. Analiza la foto de este ${generoTexto} y recomienda 3 estilos de peinado que le quedarían bien segun su forma de cara y rasgos.
 
-Los estilos disponibles son: ${estilosList}
+Estilos disponibles: ${estilosList}
 
-Responde SOLO con JSON válido, sin explicaciones ni texto adicional:
-{"sugerencias":[{"id":"id_del_estilo","razon":"explicacion breve max 12 palabras de por que le quedaria bien"},{"id":"id_del_estilo","razon":"explicacion breve"},{"id":"id_del_estilo","razon":"explicacion breve"}]}
-
-IMPORTANTE: Los ids deben ser exactamente de la lista disponible.`;
+Responde UNICAMENTE con este JSON exacto, sin texto antes ni despues:
+{"sugerencias":[{"id":"ESTILO1","razon":"por que le queda bien en max 10 palabras"},{"id":"ESTILO2","razon":"razon breve"},{"id":"ESTILO3","razon":"razon breve"}]}`;
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -51,7 +49,7 @@ IMPORTANTE: Los ids deben ser exactamente de la lista disponible.`;
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
+        max_tokens: 400,
         messages: [{
           role: 'user',
           content: [
@@ -64,11 +62,17 @@ IMPORTANTE: Los ids deben ser exactamente de la lista disponible.`;
 
     const cd = await r.json();
     const text = cd.content?.find(c => c.type === 'text')?.text || '';
-    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
 
-    // Add emoji and nombre to each suggestion
-    parsed.sugerencias = parsed.sugerencias.map(s => ({
-      ...s,
+    // Extract JSON robustly
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Claude no devolvio JSON valido');
+    
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Add emoji and nombre
+    parsed.sugerencias = parsed.sugerencias.slice(0, 3).map(s => ({
+      id: s.id,
+      razon: s.razon,
       emoji: emojis[s.id] || '✂️',
       nombre: nombres[s.id] || s.id
     }));
@@ -78,4 +82,4 @@ IMPORTANTE: Los ids deben ser exactamente de la lista disponible.`;
   } catch(e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
-} 
+}
