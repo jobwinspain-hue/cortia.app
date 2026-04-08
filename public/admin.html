@@ -274,7 +274,7 @@ function renderTabla(salones) {
           ${ingreso > 0 ? ingreso.toFixed(2) + '€' : '—'}
         </td>
         <td>
-          <a href="https://cortialooks.com/salon/${s.slug}" target="_blank" style="color:#b8965a;font-size:12px;">/${s.slug} ↗</a>
+          <a href="https://cortia-app.vercel.app/salon/${s.slug}" target="_blank" style="color:#b8965a;font-size:12px;">/${s.slug} ↗</a>
         </td>
         <td>
           <button class="btn-action" onclick="resetearContador('${s.id}','${s.nombre}')">Reset</button>
@@ -347,7 +347,7 @@ async function crearSalon() {
 
   cerrarModal();
   cargarDatos();
-  alert(`✅ Salón ${nombre} creado. URL: cortialokks.com/salon/${slug}`);
+  alert(`✅ Salón ${nombre} creado. URL: cortia-app.vercel.app/salon/${slug}`);
 }
 </script>
 </body>
