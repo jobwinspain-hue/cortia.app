@@ -7,7 +7,7 @@
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "^/logo.png/(.*)", "dest": "/logo.png/$1" },
+    { "src": "src": "^/logo.png$", "dest": "/logo.png" },
     { "src": "^/salon/?$", "dest": "/api/landing" },
     { "src": "^/salon/(.*)", "dest": "/index.html" },
     { "src": "^/$", "dest": "/api/landing" },
