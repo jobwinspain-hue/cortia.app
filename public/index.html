@@ -453,7 +453,9 @@ async function loadSalon(){
 
   try {
     const r = await fetch('/api/salon?slug=' + slug);
-    if (!r.ok) return;
+    if (!r.ok) {
+      document.getElementById('app').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;"><div style="font-size:48px;margin-bottom:16px;">✂️</div><h2 style="font-family:DM Serif Display,serif;font-size:22px;color:#1e1a16;margin-bottom:8px;">Salón no encontrado</h2><p style="font-size:14px;color:#a09a90;line-height:1.6;">El enlace que has seguido no es válido.<br>Pide a tu peluquería el enlace correcto.</p></div>';
+      return;
     salon = await r.json();
 
     // Aplicar white label
