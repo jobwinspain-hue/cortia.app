@@ -10,6 +10,7 @@
     { "src": "^/salon/?$", "dest": "/api/landing" },
     { "src": "/salon/(.*)", "dest": "/index.html" },
     { "src": "^/$", "dest": "/api/landing" },
+    { "src": "^/(?!salon|api).*$", "dest": "/api/landing" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
