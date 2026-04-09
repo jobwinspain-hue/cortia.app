@@ -486,6 +486,7 @@ async function loadSalon(){
     document.getElementById('counter-text').textContent = `${usadas} / ${limite} generaciones`;
     const dotsEl = document.getElementById('counter-dots');
     dotsEl.innerHTML = '';
+    if(salon.plan==='trial'){
     for(let i=0; i<limite; i++){
       const d = document.createElement('div');
       d.className = 'counter-dot' + (i < usadas ? ' used' : '');
