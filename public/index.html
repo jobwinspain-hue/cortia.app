@@ -652,7 +652,7 @@ document.getElementById('gen-btn').onclick=async()=>{
     if(salon){ salon.generaciones_mes=(salon.generaciones_mes||0)+1; loadSalon(); }
 
   }catch(err){
-    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;"><div style="font-size:40px;">✨</div><strong style="font-size:15px;color:#1e1a16;font-family:'DM Serif Display',serif;">Demasiada belleza para este estilo...</strong><p style="font-size:13px;color:#a09a90;line-height:1.5;max-width:280px;">CortIA cree que ya tienes demasiada belleza con este estilo y color. Prueba con otro o intentalo de nuevo.</p><button onclick="document.getElementById('gen-btn').click()" style="padding:11px 24px;border-radius:10px;background:linear-gradient(135deg,#b8965a,#a07840);color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;margin-bottom:8px;">Reintentar</button><button onclick="document.getElementById('other-btn').click()" style="padding:11px 24px;border-radius:10px;border:1px solid #e2dfd9;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Probar otro estilo</button></div>`;
+    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;"><div style="font-size:40px;">✨</div><strong style="font-size:15px;color:#1e1a16;font-family:'DM Serif Display',serif;">Demasiada belleza para este estilo...</strong><p style="font-size:13px;color:#a09a90;line-height:1.5;max-width:280px;">CortIA cree que ya tienes demasiada belleza con este estilo y color. Prueba con otro o intentalo de nuevo.</p><button onclick="reintentarGeneracion()" style="padding:11px 24px;border-radius:10px;background:linear-gradient(135deg,#b8965a,#a07840);color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;margin-bottom:8px;">Reintentar</button><button onclick="document.getElementById('other-btn').click()" style="padding:11px 24px;border-radius:10px;border:1px solid #e2dfd9;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Probar otro estilo</button></div>`;
   }
 };
 
@@ -748,6 +748,10 @@ function elegirSugerencia(styleId, colorId){
       if(acc) acc.setAttribute('open','');
     }
   },150);
+}
+  function reintentarGeneracion(){
+  resetResult();
+  document.getElementById('gen-btn').click();
 }
 </script>
 </body>
