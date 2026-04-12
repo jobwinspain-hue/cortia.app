@@ -54,9 +54,7 @@ export default async function handler(req, res) {
       const falRes = await fetch('https://fal.run/fal-ai/image-apps-v2/hair-change', {
         method: 'POST',
         headers: { 'Authorization': 'Key ' + FAL_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(hairstyle === 'natural_look' 
-  ? { image_url: file_url, target_hairstyle: 'no_change', hair_color: falColor }
-  : { image_url: file_url, target_hairstyle: hairstyle, hair_color: falColor });
+       body: JSON.stringify({ image_url: file_url, target_hairstyle: hairstyle, hair_color: falColor });
       const falText = await falRes.text();
       if (!falText || falText.trim() === '') throw new Error('fal.ai respuesta vacía');
       let falData;
