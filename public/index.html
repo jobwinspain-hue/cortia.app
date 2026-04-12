@@ -443,6 +443,8 @@ const HAIR_COLORS = [
   {id:'highlights',name:'Mechas',color:'linear-gradient(90deg,#8B4513,#f0d060)',fal:'highlights'},
   {id:'balayage',name:'Balayage',color:'linear-gradient(180deg,#5c3317,#d4a84b)',fal:'balayage'},
   {id:'ombre',name:'Ombré',color:'linear-gradient(180deg,#3d1c02,#e8c96a)',fal:'ombre'},
+  {id:'babylights',name:'Babylights',color:'linear-gradient(90deg,#c8a96e,#f0e0b0,#c8a96e)',fal:'babylights'},
+  {id:'money_piece',name:'Money Piece',color:'linear-gradient(90deg,#3d1c02,#f0d060,#3d1c02)',fal:'money piece highlights'},
   {id:'rainbow',name:'Arcoíris',color:'linear-gradient(90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6)',fal:'rainbow'},
 ];
 
@@ -751,7 +753,7 @@ function elegirSugerencia(styleId, colorId){
 }
   function reintentarGeneracion(){
   resetResult();
-  document.getElementById('gen-btn').click();
+  document.getElementById('gen-btn').dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
 }
 </script>
 </body>
