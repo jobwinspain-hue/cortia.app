@@ -353,6 +353,7 @@ canvas { display: none; }
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const STYLES = {
   hombre:[
+    {id:'natural_look',name:'Pelo actual',sub:'Selecciona color',e:'💆',fal:'natural_hair'},
     {id:'undercut',name:'Undercut',sub:'Moderno',e:'💈',fal:'short_hair'},
     {id:'fade',name:'Fade',sub:'Degradado',e:'✂️',fal:'short_hair'},
     {id:'pompadour',name:'Pompadour',sub:'Clásico',e:'🎸',fal:'medium_long_hair'},
@@ -382,6 +383,7 @@ const STYLES = {
     {id:'calvo',name:'Cabeza rapada',sub:'Sin pelo',e:'💡',fal:'buzz_cut'},
   ],
   mujer:[
+    {id:'natural_look',name:'Pelo actual',sub:'Selecciona color',e:'💆',fal:'natural_hair'},
     {id:'bob',name:'Bob',sub:'Clásico',e:'💎',fal:'bob_cut'},
     {id:'lob',name:'Lob',sub:'Media melena',e:'🌸',fal:'medium_long_hair'},
     {id:'pixie',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
@@ -410,6 +412,7 @@ const STYLES = {
     {id:'cornrows_w',name:'Cornrows',sub:'Trenzas',e:'🌾',fal:'braids'},
   ],
   neutro:[
+    {id:'natural_look',name:'Pelo actual',sub:'Selecciona color',e:'💆',fal:'natural_hair'},
     {id:'buzz_n',name:'Buzz Cut',sub:'Rapado',e:'⚡',fal:'buzz_cut'},
     {id:'textured_n',name:'Texturizado',sub:'Natural',e:'🍃',fal:'wavy_hair'},
     {id:'pixie_n',name:'Pixie',sub:'Muy corto',e:'⭐',fal:'pixie_cut'},
@@ -443,8 +446,6 @@ const HAIR_COLORS = [
   {id:'highlights',name:'Mechas',color:'linear-gradient(90deg,#8B4513,#f0d060)',fal:'highlights'},
   {id:'balayage',name:'Balayage',color:'linear-gradient(180deg,#5c3317,#d4a84b)',fal:'balayage'},
   {id:'ombre',name:'Ombré',color:'linear-gradient(180deg,#3d1c02,#e8c96a)',fal:'ombre'},
-  {id:'babylights',name:'Babylights',color:'linear-gradient(90deg,#c8a96e,#f0e0b0,#c8a96e)',fal:'babylights'},
-  {id:'money_piece',name:'Money Piece',color:'linear-gradient(90deg,#3d1c02,#f0d060,#3d1c02)',fal:'money piece highlights'},
   {id:'rainbow',name:'Arcoíris',color:'linear-gradient(90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6)',fal:'rainbow'},
 ];
 
@@ -654,7 +655,7 @@ document.getElementById('gen-btn').onclick=async()=>{
     if(salon){ salon.generaciones_mes=(salon.generaciones_mes||0)+1; loadSalon(); }
 
   }catch(err){
-    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;"><div style="font-size:40px;">✨</div><strong style="font-size:15px;color:#1e1a16;font-family:'DM Serif Display',serif;">Demasiada belleza para este estilo...</strong><p style="font-size:13px;color:#a09a90;line-height:1.5;max-width:280px;">CortIA cree que tienes demasiada belleza con este estilo y color. Prueba con otro o intentalo de nuevo.</p><button onclick="reintentarGeneracion()" style="padding:11px 24px;border-radius:10px;background:linear-gradient(135deg,#b8965a,#a07840);color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;margin-bottom:8px;">Reintentar</button><button onclick="document.getElementById('other-btn').click()" style="padding:11px 24px;border-radius:10px;border:1px solid #e2dfd9;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Probar otro estilo</button></div>`;
+    document.getElementById('loading').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;"><div style="font-size:40px;">✨</div><strong style="font-size:15px;color:#1e1a16;font-family:'DM Serif Display',serif;">Demasiada belleza para este estilo...</strong><p style="font-size:13px;color:#a09a90;line-height:1.5;max-width:280px;">CortIA cree que tienes demasiada belleza con este estilo y color. Prueba con otro o intentalo de nuevo.</p><button onclick="document.getElementById('other-btn').click()" style="padding:11px 24px;border-radius:10px;border:1px solid #e2dfd9;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">Probar otro estilo</button></div>`;
   }
 };
 
@@ -750,10 +751,6 @@ function elegirSugerencia(styleId, colorId){
       if(acc) acc.setAttribute('open','');
     }
   },150);
-}
-  function reintentarGeneracion(){
-  resetResult();
-  document.getElementById('gen-btn').dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
 }
 </script>
 </body>
