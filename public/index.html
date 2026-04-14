@@ -523,11 +523,50 @@ function setScreen(n){
 
 function renderStyles(){
   const g=document.getElementById('sty-grid'); g.innerHTML='';
-  STYLES[gender].forEach(s=>{
-    const c=document.createElement('div'); c.className='sty-card'+(style===s.id?' sel':'');
-    c.innerHTML=`<span class="sty-e">${s.e}</span><span class="sty-n">${s.name}</span><span class="sty-s">${s.sub}</span>`;
-    c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
-    g.appendChild(c);
+  const categorias = {
+    hombre:[
+      {cat:'Muy corto', ids:['buzz','rapado','rapado_dis','calvo']},
+      {cat:'Corto', ids:['fade','undercut','french_crop','caesar','taper','edgar','bowl']},
+      {cat:'Con volumen', ids:['quiff','pompadour','slickback','sidepart','ivy_league','curtains','fringe']},
+      {cat:'Textura y ondas', ids:['textured','mullet','waves']},
+      {cat:'Largo', ids:['long']},
+      {cat:'Atrevidos', ids:['mohawk']},
+      {cat:'Especiales', ids:['dreadlocks','cornrows','bun_m','afro_m']},
+    ],
+    mujer:[
+      {cat:'Corto', ids:['pixie','bixie','rapada_w']},
+      {cat:'Media melena', ids:['bob','lob','french_bob']},
+      {cat:'Con movimiento', ids:['layers','wolf','beach_waves','octopus','shag','butterfly','blowout']},
+      {cat:'Con flequillo', ids:['bangs','curtainbangs','melena_flequillo']},
+      {cat:'Liso y largo', ids:['straight','long_w']},
+      {cat:'Rizado', ids:['curly']},
+      {cat:'Recogidos', ids:['bun','recogido_bajo','ponytail']},
+      {cat:'Trenzas', ids:['braids','trenza_fr','cornrows_w']},
+      {cat:'Especiales', ids:['afro_w']},
+    ],
+    neutro:[
+      {cat:'Muy corto', ids:['buzz_n']},
+      {cat:'Corto', ids:['pixie_n','mohawk_n']},
+      {cat:'Textura', ids:['textured_n','wolf_n','shag_n']},
+      {cat:'Media', ids:['bob_n']},
+      {cat:'Largo', ids:['long_n']},
+      {cat:'Recogidos', ids:['ponytail_n']},
+      {cat:'Especiales', ids:['afro_n','dread_n','braids_n']},
+    ]
+  };
+  categorias[gender].forEach(grupo=>{
+    const estilosGrupo = grupo.ids.map(id=>STYLES[gender].find(s=>s.id===id)).filter(Boolean);
+    if(!estilosGrupo.length) return;
+    const sep=document.createElement('div');
+    sep.style.cssText='grid-column:1/-1;font-size:10px;font-weight:700;color:var(--gray-300);text-transform:uppercase;letter-spacing:1.2px;padding:8px 0 2px;border-top:1px solid var(--gray-100);margin-top:4px;';
+    sep.textContent=grupo.cat;
+    g.appendChild(sep);
+    estilosGrupo.forEach(s=>{
+      const c=document.createElement('div'); c.className='sty-card'+(style===s.id?' sel':'');
+      c.innerHTML=`<span class="sty-e">${s.e}</span><span class="sty-n">${s.name}</span><span class="sty-s">${s.sub}</span>`;
+      c.onclick=()=>{ style=s.id; document.querySelectorAll('.sty-card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
+      g.appendChild(c);
+    });
   });
   document.getElementById('color-section').style.display='block';
 }
