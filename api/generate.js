@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       
       const parts = [];
       // image field
-      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="image"; filename="photo.png"\r\nContent-Type: image/png\r\n\r\n`));
+      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="image"; filename="photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`));
       parts.push(imgBuffer);
       parts.push(Buffer.from('\r\n'));
       // prompt field
