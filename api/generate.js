@@ -52,7 +52,6 @@ export default async function handler(req, res) {
       // size field
       parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="size"\r\n\r\n1024x1024\r\n`));
       // quality field
-      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="quality"\r\n\r\nmedium\r\n`));
       // n field
       parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="n"\r\n\r\n1\r\n`));
       // response_format
