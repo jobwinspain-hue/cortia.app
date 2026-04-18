@@ -611,8 +611,14 @@ const v=document.getElementById('video'); v.srcObject=stream; v.style.display='b
 document.getElementById('open-cam').onclick=startCam;
 document.getElementById('cap-btn').onclick=()=>{
   const v=document.getElementById('video'),c=document.getElementById('canv');
+  const isFront = facing==='user';
   c.width=v.videoWidth; c.height=v.videoHeight;
-  c.getContext('2d').drawImage(v,0,0);
+  const ctx=c.getContext('2d');
+  if(isFront){
+    ctx.translate(c.width,0);
+    ctx.scale(-1,1);
+  }
+  ctx.drawImage(v,0,0);
   photo=c.toDataURL('image/jpeg',0.9);
   document.getElementById('prev').src=photo;
   showConfirm();
