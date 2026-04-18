@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       const fileName = isPNG ? 'photo.png' : 'photo.jpeg';
 
       const parts = [];
-      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="model"${CRLF}${CRLF}gpt-image-1${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="model"${CRLF}${CRLF}gpt-image-1.5${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="prompt"${CRLF}${CRLF}${prompt}${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="size"${CRLF}${CRLF}1024x1024${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="input_fidelity"${CRLF}${CRLF}high${CRLF}`));
