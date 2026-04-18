@@ -5,16 +5,16 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const FAL_KEY = process.env.FAL_KEY;
+  const OPENAI_KEY = process.env.OPENAI_KEY;
   const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
   try {
-    const { imageBase64, hairstyle, hairColor, styleLabel, genero, salonId, beard } = req.body;
+    const { imageBase64, hairstyle, hairColor, styleLabel, genero, salonId } = req.body;
     if (!imageBase64 || !hairstyle) return res.status(400).json({ error: 'Faltan parámetros' });
 
-    // Verificar límite del salón
+    // 1. Verificar límite del salón
     if (salonId) {
       const sr = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=generaciones_mes,generaciones_limite,plan,mes_actual`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
@@ -30,54 +30,59 @@ export default async function handler(req, res) {
       }
     }
 
-    // 1. Subir imagen a fal.ai
-    let file_url;
-    try {
-      const initRes = await fetch('https://rest.alpha.fal.ai/storage/upload/initiate', {
-        method: 'POST',
-        headers: { 'Authorization': 'Key ' + FAL_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content_type: 'image/jpeg', file_name: 'photo.jpg' })
-      });
-      const initText = await initRes.text();
-      if (!initRes.ok) throw new Error('Upload error ' + initRes.status + ': ' + initText.substring(0, 200));
-      const initData = JSON.parse(initText);
-      file_url = initData.file_url;
-      const imgBuffer = Buffer.from(imageBase64, 'base64');
-      const putRes = await fetch(initData.upload_url, { method: 'PUT', body: imgBuffer, headers: { 'Content-Type': 'image/jpeg' } });
-      if (!putRes.ok) throw new Error('PUT error ' + putRes.status);
-    } catch(e) { return res.status(500).json({ error: 'Error subiendo imagen: ' + e.message }); }
+    // 2. Convertir imagen a PNG usando canvas-like approach
+    // La imagen viene en base64, puede ser JPEG o PNG
+    // Necesitamos enviarla como PNG para gpt-image-1
+    const imgBuffer = Buffer.from(imageBase64, 'base64');
 
-    // 2. Generar con fal.ai
-    const falColor = (hairColor && hairColor !== 'natural') ? hairColor : 'natural';
+    // 3. Construir prompt
+    const colorDesc = (hairColor && hairColor !== 'natural') ? `, hair color: ${hairColor}` : '';
+    const prompt = `Change only the hairstyle of the person in this photo to: ${styleLabel || hairstyle}${colorDesc}. Keep the face, skin tone, eyes, facial features, background and everything else exactly identical. Only the hair should change. Make it look photorealistic and natural.`;
+
+    // 4. Generar con GPT Image 1 edits endpoint
     let resultUrl;
     try {
-      const falRes = await fetch('https://fal.run/fal-ai/image-apps-v2/hair-change', {
+      const boundary = 'CortIABoundary' + Date.now();
+      const CRLF = '\r\n';
+
+      // Detectar si es PNG o JPEG por los magic bytes
+      const isPNG = imgBuffer[0] === 0x89 && imgBuffer[1] === 0x50;
+      const mimeType = isPNG ? 'image/png' : 'image/jpeg';
+      const fileName = isPNG ? 'photo.png' : 'photo.jpeg';
+
+      const parts = [];
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="model"${CRLF}${CRLF}gpt-image-1${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="prompt"${CRLF}${CRLF}${prompt}${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="size"${CRLF}${CRLF}1024x1024${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="n"${CRLF}${CRLF}1${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="image"; filename="${fileName}"${CRLF}Content-Type: ${mimeType}${CRLF}${CRLF}`));
+      parts.push(imgBuffer);
+      parts.push(Buffer.from(`${CRLF}--${boundary}--${CRLF}`));
+
+      const body = Buffer.concat(parts);
+
+      const openaiRes = await fetch('https://api.openai.com/v1/images/edits', {
         method: 'POST',
-        headers: { 'Authorization': 'Key ' + FAL_KEY, 'Content-Type': 'application/json' },
-       body: JSON.stringify({ image_url: file_url, target_hairstyle: hairstyle, hair_color: falColor })
+        headers: {
+          'Authorization': 'Bearer ' + OPENAI_KEY,
+          'Content-Type': `multipart/form-data; boundary=${boundary}`
+        },
+        body
       });
-      const falText = await falRes.text();
-      if (!falText || falText.trim() === '') throw new Error('fal.ai respuesta vacía');
-      let falData;
-      try { falData = JSON.parse(falText); } catch(e) { throw new Error('fal.ai no es JSON: ' + falText.substring(0, 200)); }
-      if (!falRes.ok) throw new Error('fal.ai ' + falRes.status + ': ' + (falData.detail || falData.message || ''));
-      resultUrl = falData.image?.url || falData.images?.[0]?.url || falData.image_url;
-      if (!resultUrl) throw new Error('fal.ai sin URL. Respuesta: ' + JSON.stringify(falData).substring(0, 200));
+
+      const openaiData = await openaiRes.json();
+      if (!openaiRes.ok) throw new Error('OpenAI: ' + (openaiData.error?.message || JSON.stringify(openaiData).substring(0, 400)));
+
+      if (openaiData.data?.[0]?.b64_json) {
+        resultUrl = 'data:image/png;base64,' + openaiData.data[0].b64_json;
+      } else if (openaiData.data?.[0]?.url) {
+        resultUrl = openaiData.data[0].url;
+      } else {
+        throw new Error('Sin imagen en respuesta: ' + JSON.stringify(openaiData).substring(0, 200));
+      }
     } catch(e) { return res.status(500).json({ error: 'Error generando imagen: ' + e.message }); }
 
-    // 3. Segunda pasada de color si es especial
-    if (falColor !== 'natural') {
-      try {
-        const r2 = await fetch('https://fal.run/fal-ai/image-apps-v2/hair-change', {
-          method: 'POST',
-          headers: { 'Authorization': 'Key ' + FAL_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image_url: file_url, target_hairstyle: hairstyle, hair_color: falColor })
-      });
-        if (r2.ok) { const d2 = await r2.json(); const u2 = d2.image?.url || d2.images?.[0]?.url; if (u2) resultUrl = u2; }
-      } catch(e) {}
-    }
-
-    // 4. Registrar generación y actualizar contador
+    // 5. Registrar generación
     if (salonId) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/generaciones`, {
@@ -85,12 +90,6 @@ export default async function handler(req, res) {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ salon_id: salonId, estilo: styleLabel || hairstyle, genero: genero || 'desconocido', color_pelo: hairColor || 'natural' })
         });
-        await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
-          method: 'PATCH',
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ generaciones_mes: { raw: 'generaciones_mes + 1' } })
-        });
-        // Incrementar con RPC
         await fetch(`${SUPABASE_URL}/rest/v1/rpc/incrementar_generaciones`, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
@@ -99,7 +98,7 @@ export default async function handler(req, res) {
       } catch(e) {}
     }
 
-    // 5. Análisis Claude (opcional)
+    // 6. Análisis Claude (opcional)
     let analysis = { instrucciones: 'Muestra esta imagen a tu peluquero como referencia exacta.', tips: ['Lleva esta foto al peluquero', 'Pregunta por el mantenimiento', 'Pide una prueba antes del corte definitivo'] };
     if (ANTHROPIC_KEY && styleLabel) {
       try {
@@ -108,9 +107,7 @@ export default async function handler(req, res) {
           headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001', max_tokens: 200,
-            messages: [{ role: 'user', content: [
-              { type: 'text', text: `Eres estilista. Estilo: "${styleLabel}"${falColor !== 'natural' ? `, color: ${falColor}` : ''}. Responde SOLO JSON sin explicaciones: {"instrucciones":"frase corta para el peluquero max 15 palabras","tips":["tip1","tip2","tip3"]}` }
-            ]}]
+            messages: [{ role: 'user', content: [{ type: 'text', text: `Eres estilista. Estilo: "${styleLabel}"${hairColor && hairColor !== 'natural' ? `, color: ${hairColor}` : ''}. Responde SOLO JSON sin explicaciones: {"instrucciones":"frase corta para el peluquero max 15 palabras","tips":["tip1","tip2","tip3"]}` }]}]
           })
         });
         if (cr.ok) { const cd = await cr.json(); const ct = cd.content?.find(c => c.type === 'text')?.text || ''; analysis = JSON.parse(ct.replace(/```json|```/g, '').trim()); }
