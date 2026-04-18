@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       const parts = [];
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="model"${CRLF}${CRLF}gpt-image-1.5${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="prompt"${CRLF}${CRLF}${prompt}${CRLF}`));
-      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="size"${CRLF}${CRLF}1024x1024${CRLF}`));
+      parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="size"${CRLF}${CRLF}1024x1536${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="input_fidelity"${CRLF}${CRLF}high${CRLF}`));
       parts.push(Buffer.from(`--${boundary}${CRLF}Content-Disposition: form-data; name="image"; filename="${fileName}"${CRLF}Content-Type: ${mimeType}${CRLF}${CRLF}`));
       parts.push(imgBuffer);
