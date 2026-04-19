@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/salones?slug=eq.${slug}&select=id,slug,nombre,logo_url,color_primario,color_acento,plan,generaciones_mes,generaciones_limite,mes_actual,activo`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/salones?slug=eq.${slug}&select=id,slug,nombre,logo_url,color_primario,color_acento,plan,generaciones_mes,generaciones_limite,mes_actual,activo,stripe_subscription_id,pin_gestion`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     const data = await r.json();
