@@ -726,15 +726,41 @@ function mostrarPrivacidad(){
   document.getElementById('privacy-modal').style.display='block';
 }
 
-async function gestionarSuscripcion(){
-  const msg='Cancelar suscripcion: seguiras con acceso hasta fin del periodo pagado. El mes siguiente volveras al plan gratuito. Confirmar?';
-  if(!confirm(msg))return;
+function gestionarSuscripcion(){
+  document.getElementById('gestion-modal').style.display='block';
+  document.getElementById('gestion-pin-step').style.display='block';
+  document.getElementById('gestion-opciones-step').style.display='none';
+  document.getElementById('gestion-pin-input').value='';
+  document.getElementById('pin-error').style.display='none';
+}
+function cerrarGestion(){
+  document.getElementById('gestion-modal').style.display='none';
+}
+async function verificarPin(){
+  const pinIntroducido=document.getElementById('gestion-pin-input').value.trim();
   try{
-    const r=await fetch('/api/cancelar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({salonId:salon.id})});
+    const r=await fetch('/api/salon?slug='+salon.slug);
     const d=await r.json();
-    if(d.ok)alert('Suscripcion cancelada. Acceso hasta el '+d.fechaFin+'. Gracias por usar CortIA.');
-    else throw new Error(d.error);
-  }catch(e){alert('Error: '+e.message);}
+    const s=Array.isArray(d)?d[0]:d;
+    if(pinIntroducido===s.pin_gestion){
+      document.getElementById('gestion-pin-step').style.display='none';
+      document.getElementById('gestion-opciones-step').style.display='block';
+      document.getElementById('pin-error').style.display='none';
+    }else{
+      document.getElementById('pin-error').style.display='block';
+    }
+  }catch(e){alert('Error verificando PIN.');}
+}
+function solicitarCambioPlan(){
+  const nombreSalon=salon?.nombre||'mi salón';
+  const planActual=salon?.plan||'actual';
+  window.location.href=`mailto:info@cortialooks.com?subject=Cambiar de plan - ${nombreSalon}&body=Hola, soy el titular del salón ${nombreSalon} (plan ${planActual}) y me gustaría cambiar de plan. Por favor, contactadme. Gracias.`;
+  cerrarGestion();
+}
+function solicitarCancelacion(){
+  const nombreSalon=salon?.nombre||'mi salón';
+  window.location.href=`mailto:info@cortialooks.com?subject=Cancelar suscripción - ${nombreSalon}&body=Hola, soy el titular del salón ${nombreSalon} y quiero cancelar mi suscripción. Por favor, proceded con la cancelación. Gracias.`;
+  cerrarGestion();
 }
 
 async function elegirPlan(plan){
@@ -790,5 +816,24 @@ function elegirSugerencia(styleId, colorId){
   },150);
 }
 </script>
+  <div id="gestion-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;padding:20px;overflow-y:auto;">
+  <div style="background:white;border-radius:16px;max-width:380px;margin:60px auto;padding:28px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;color:#1e1a16;">Gestionar suscripción</h2>
+      <button onclick="cerrarGestion()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:#a09a90;">✕</button>
+    </div>
+    <div id="gestion-pin-step">
+      <p style="font-size:13px;color:#5a5550;margin-bottom:16px;line-height:1.6;">Introduce el PIN de gestión para continuar.</p>
+      <input type="password" id="gestion-pin-input" placeholder="PIN" maxlength="6" style="width:100%;padding:12px 14px;border:1.5px solid #e2dfd9;border-radius:10px;font-size:16px;font-family:inherit;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px;">
+      <button onclick="verificarPin()" style="width:100%;padding:13px;background:#1e1a16;color:#f5e6c8;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Continuar →</button>
+      <div id="pin-error" style="display:none;color:#c4706a;font-size:12px;text-align:center;margin-top:8px;">PIN incorrecto. Inténtalo de nuevo.</div>
+    </div>
+    <div id="gestion-opciones-step" style="display:none;">
+      <p style="font-size:13px;color:#5a5550;margin-bottom:20px;line-height:1.6;">¿Qué deseas hacer con tu suscripción?</p>
+      <button onclick="solicitarCambioPlan()" style="width:100%;padding:13px;background:#4a9b8e;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:10px;">⬆️ Cambiar de plan</button>
+      <button onclick="solicitarCancelacion()" style="width:100%;padding:13px;background:white;color:#c4706a;border:1.5px solid #c4706a;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Cancelar suscripción</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
