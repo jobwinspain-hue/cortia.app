@@ -16,9 +16,12 @@ const LIMITES_POR_PLAN = {
 };
 
 const LIMITES_POR_PRECIO = {
-  2499: { plan: 'basico',  limite: 200  },
-  4999: { plan: 'pro',     limite: 500  },
-  9999: { plan: 'premium', limite: 1500 },
+  2499:  { plan: 'basico',  limite: 200  },
+  4999:  { plan: 'pro',     limite: 500  },
+  9999:  { plan: 'premium', limite: 1500 },
+  3490:  { plan: 'basico',  limite: 200  },
+  6490:  { plan: 'pro',     limite: 500  },
+  15990: { plan: 'premium', limite: 1500 },
 };
 
 export default async function handler(req, res) {
