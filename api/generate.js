@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     // 1. Verificar límite del salón
     if (salonId) {
-      const sr = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=generaciones_mes,generaciones_limite,plan,mes_actual`, {
+      const sr = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=generaciones_mes,generaciones_limite,plan,mes_actual,generaciones_hoy,dia_actual`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       });
       const sdata = await sr.json();
@@ -90,11 +90,28 @@ export default async function handler(req, res) {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ salon_id: salonId, estilo: styleLabel || hairstyle, genero: genero || 'desconocido', color_pelo: hairColor || 'natural' })
         });
-        await fetch(`${SUPABASE_URL}/rest/v1/rpc/incrementar_generaciones`, {
-          method: 'POST',
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ salon_id_param: salonId })
-        });
+        const hoy = new Date().toISOString().slice(0, 10);
+const mesActualInc = new Date().toISOString().slice(0, 7);
+
+const estadoRes = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=mes_actual,dia_actual,generaciones_mes,generaciones_hoy`, {
+  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+});
+const estadoData = await estadoRes.json();
+const estado = estadoData[0] || {};
+
+const nuevoGenMes = estado.mes_actual !== mesActualInc ? 1 : (estado.generaciones_mes || 0) + 1;
+const nuevoGenHoy = estado.dia_actual !== hoy ? 1 : (estado.generaciones_hoy || 0) + 1;
+
+await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
+  method: 'PATCH',
+  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+  body: JSON.stringify({
+    generaciones_mes: nuevoGenMes,
+    mes_actual: mesActualInc,
+    generaciones_hoy: nuevoGenHoy,
+    dia_actual: hoy
+  })
+});
       } catch(e) {}
     }
 
