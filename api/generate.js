@@ -15,11 +15,12 @@ export default async function handler(req, res) {
     if (!imageBase64 || !hairstyle) return res.status(400).json({ error: 'Faltan parámetros' });
 
     // 1. Verificar límite del salón
+    let sdata = null;
     if (salonId) {
       const sr = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=generaciones_mes,generaciones_limite,plan,mes_actual,generaciones_hoy,dia_actual`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       });
-      const sdata = await sr.json();
+      sdata = await sr.json();
       if (sdata && sdata.length > 0) {
         const salon = sdata[0];
         const mesActual = new Date().toISOString().slice(0, 7);
@@ -30,9 +31,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Convertir imagen a PNG usando canvas-like approach
-    // La imagen viene en base64, puede ser JPEG o PNG
-    // Necesitamos enviarla como PNG para gpt-image-1
+    // 2. Leer imagen
     const imgBuffer = Buffer.from(imageBase64, 'base64');
 
     // 3. Construir prompt
@@ -45,7 +44,6 @@ export default async function handler(req, res) {
       const boundary = 'CortIABoundary' + Date.now();
       const CRLF = '\r\n';
 
-      // Detectar si es PNG o JPEG por los magic bytes
       const isPNG = imgBuffer[0] === 0x89 && imgBuffer[1] === 0x50;
       const mimeType = isPNG ? 'image/png' : 'image/jpeg';
       const fileName = isPNG ? 'photo.png' : 'photo.jpeg';
@@ -90,29 +88,35 @@ export default async function handler(req, res) {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ salon_id: salonId, estilo: styleLabel || hairstyle, genero: genero || 'desconocido', color_pelo: hairColor || 'natural' })
         });
+
         const hoy = new Date().toISOString().slice(0, 10);
-const mesActualInc = new Date().toISOString().slice(0, 7);
+        const mesActualInc = new Date().toISOString().slice(0, 7);
 
-const estadoRes = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}&select=mes_actual,dia_actual,generaciones_mes,generaciones_hoy`, {
-  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-});
-const estadoData = await estadoRes.json();
-const estado = estadoData[0] || {};
+        // Reutilizar sdata del paso 1 — sin segundo SELECT
+        const estado = (sdata && sdata.length > 0) ? sdata[0] : {};
 
-const nuevoGenMes = estado.mes_actual !== mesActualInc ? 1 : (estado.generaciones_mes || 0) + 1;
-const nuevoGenHoy = estado.dia_actual !== hoy ? 1 : (estado.generaciones_hoy || 0) + 1;
+        const nuevoGenMes = estado.mes_actual !== mesActualInc ? 1 : (estado.generaciones_mes || 0) + 1;
+        const nuevoGenHoy = estado.dia_actual !== hoy ? 1 : (estado.generaciones_hoy || 0) + 1;
 
-await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
-  method: 'PATCH',
-  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-  body: JSON.stringify({
-    generaciones_mes: nuevoGenMes,
-    mes_actual: mesActualInc,
-    generaciones_hoy: nuevoGenHoy,
-    dia_actual: hoy
-  })
-});
-      } catch(e) {}
+        const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/salones?id=eq.${salonId}`, {
+          method: 'PATCH',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            generaciones_mes: nuevoGenMes,
+            mes_actual: mesActualInc,
+            generaciones_hoy: nuevoGenHoy,
+            dia_actual: hoy
+          })
+        });
+
+        if (!patchRes.ok) {
+          const patchErr = await patchRes.text();
+          console.error('PATCH salones error:', patchRes.status, patchErr);
+        }
+
+      } catch(e) {
+        console.error('Error paso 5:', e.message);
+      }
     }
 
     // 6. Análisis Claude (opcional)
